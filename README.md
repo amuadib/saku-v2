@@ -110,3 +110,13 @@ npm run dev
 ```
 
 Aplikasi sekarang sudah berjalan! Silakan buka *browser* Anda dan kunjungi `http://localhost:8000`.
+
+## Lisensi & Disclaimer
+
+Saku v2 adalah perangkat lunak *open-source* yang dilisensikan di bawah [MIT license](https://opensource.org/licenses/MIT), sejalan dengan lisensi yang digunakan oleh *framework* Laravel.
+
+Perangkat lunak ini disediakan "APA ADANYA" (*AS IS*), tanpa jaminan dalam bentuk apa pun, baik tersurat maupun tersirat, termasuk namun tidak terbatas pada jaminan kelayakan untuk diperdagangkan, kesesuaian untuk tujuan tertentu, dan ketiadaan pelanggaran. Dalam kondisi apa pun, penulis atau pemegang hak cipta tidak bertanggung jawab atas klaim, kerusakan, atau kewajiban lain, baik dalam tindakan kontrak, kesalahan, atau lainnya, yang timbul dari, di luar, atau sehubungan dengan perangkat lunak atau penggunaan atau transaksi lain di dalam perangkat lunak.
+
+## Sponsor
+
+Buy me a coffee (or tea, or snacks) :) [Ko-Fi](https://ko-fi.com/amuadib)

@@ -4,16 +4,15 @@ namespace App\Livewire\Admin\Siswa;
 
 use App\Models\Kelas;
 use App\Models\Penjualan;
-use App\Models\Periode;
 use App\Models\Siswa;
 use App\Models\User;
-use App\Services\KelasService;
 use App\Services\WhatsappService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -63,6 +62,12 @@ class SiswaList extends Component
 
     public $syncOutput = '';
 
+    public $showMagicLinkModal = false;
+
+    public $magicLinkUrl = '';
+
+    public $magicLinkSiswaName = '';
+
     // Penjualan Modal Properties removed (extracted to SiswaPenjualanModal)
 
     public function mount()
@@ -111,6 +116,32 @@ class SiswaList extends Component
         $this->selectAll = false;
         $this->selectAllPage = false;
         $this->selected = [];
+    }
+
+    public function generateMagicLink($siswa_id)
+    {
+        $siswa = Siswa::find($siswa_id);
+        if (! $siswa) {
+            return;
+        }
+
+        $user = User::where('authable_type', Siswa::class)
+            ->where('authable_id', $siswa->id)
+            ->first();
+
+        if (! $user) {
+            \Flux::toast('User belum digenerate untuk siswa ini. Silakan generate user terlebih dahulu.', variant: 'danger');
+
+            return;
+        }
+
+        $this->magicLinkSiswaName = $siswa->nama;
+        $relativeUrl = URL::temporarySignedRoute(
+            'login.magic', now()->addDays(30), ['user' => $user->id], false
+        );
+        $this->magicLinkUrl = request()->getSchemeAndHttpHost().$relativeUrl;
+
+        $this->showMagicLinkModal = true;
     }
 
     // Penjualan Modal Methods removed (extracted to SiswaPenjualanModal)
@@ -219,93 +250,6 @@ class SiswaList extends Component
         $this->inputConfirmationCode = '';
 
         session()->flash('message', 'Data siswa terpilih berhasil dihapus.');
-    }
-
-    public function prosesKenaikanKelas()
-    {
-        if (empty($this->selected) && ! $this->selectAll) {
-            \Flux::toast('Tidak ada data yang dipilih.', variant: 'danger');
-
-            return;
-        }
-
-        $query = $this->getSiswaQuery();
-        if (! $this->selectAll) {
-            $query->whereIn('id', $this->selected);
-        }
-
-        $siswas = $query->with('kelas.periode')->get();
-
-        $data = [];
-        $kelas = [];
-        $lulus = [];
-
-        $aktif = Periode::where('aktif', true)->first();
-        if ($aktif) {
-            $periode_aktif = substr($aktif->nama, 0, 4);
-        } else {
-            \Flux::toast('Periode Aktif belum diatur', variant: 'warning');
-
-            return;
-        }
-
-        foreach ($siswas as $s) {
-            if ($s->status > 1) { // if status != aktif, lewati
-                continue;
-            }
-            if (! $s->kelas || ! $s->kelas->periode) { // safeguard
-                continue;
-            }
-            // CEK LOGIKA LULUS
-            if (
-                $s->kelas->tingkat == max(config('custom.tingkat')[$s->lembaga_id]) and
-                $s->status != 3 and
-                $s->kelas->periode->id != $aktif->id
-            ) { // if Siswa mempunyai kelas tertinggi dan status belum lulus, luluskan
-                $lulus[] = $s->id;
-            } else {
-                if ($periode_aktif - substr($s->kelas->periode->nama, 0, 4) == 1) { // TA kelas Siswa adalah TA kemarin
-                    $id_kelas = $s->lembaga_id.'-'.$s->kelas->tingkat.'-'.$s->kelas->nama;
-                    $data[] = ['id' => $s->id, 'kelas_id' => $id_kelas];
-                    $kelas[$id_kelas] = [
-                        'lembaga_id' => $s->lembaga_id,
-                        'tingkat' => $s->kelas->tingkat,
-                        'nama' => $s->kelas->nama,
-                    ];
-                }
-            }
-        }
-
-        $message = [];
-
-        if (count($lulus) > 0) { // luluskan siswa
-            Siswa::whereIn('id', $lulus)->update(['status' => 3]);
-            $message[] = count($lulus).' Siswa berhasil Diluluskan.';
-        }
-
-        if (count($data) == 0) {
-            if (count($lulus) > 0) {
-                \Flux::toast(implode(' ', $message), variant: 'success');
-                $this->deselectAll();
-            } else {
-                \Flux::toast('Data Siswa terpilih tidak memenuhi syarat untuk Naik Kelas', variant: 'warning');
-            }
-
-            return;
-        } else {
-            $result = KelasService::prosesKenaikanKelas($aktif->id, $kelas, $data);
-            if ($result > 0) {
-                $message[] = $result.' Siswa berhasil Naik Kelas.';
-                \Flux::toast(implode(' ', $message), variant: 'success');
-            } else {
-                if (count($lulus) > 0) {
-                    \Flux::toast(implode(' ', $message), variant: 'success');
-                } else {
-                    \Flux::toast('Gagal memproses kenaikan kelas.', variant: 'danger');
-                }
-            }
-            $this->deselectAll();
-        }
     }
 
     public function generateUserSiswa()

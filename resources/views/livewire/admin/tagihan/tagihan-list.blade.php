@@ -111,25 +111,15 @@
                     <span class="text-gray-500 dark:text-gray-400">Kode Tagihan</span>
                     <span class="col-span-2 font-medium">{{ $this->selectedTagihan->kode ?? '-' }}</span>
                 </div>
-                <div class="grid grid-cols-3 text-sm">
-                    <span class="text-gray-500 dark:text-gray-400">Total Tagihan</span>
-                    <span class="col-span-2 font-medium">Rp {{ number_format($this->selectedTagihan->jumlah, 0, ',', '.') }}</span>
-                </div>
-                <div class="grid grid-cols-3 text-sm">
-                    <span class="text-gray-500 dark:text-gray-400">Sudah Dibayar</span>
-                    <span class="col-span-2 font-medium text-green-600 dark:text-green-400">Rp {{ number_format($this->selectedTagihan->bayar, 0, ',', '.') }}</span>
-                </div>
                 <div class="grid grid-cols-3 text-sm pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">Sisa Tagihan</span>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Tagihan</span>
                     <span class="col-span-2 font-bold text-red-600 dark:text-red-400">Rp {{ number_format($this->selectedTagihan->jumlah - $this->selectedTagihan->bayar, 0, ',', '.') }}</span>
                 </div>
-            </div>
+                <div class="grid grid-cols-3 text-sm border-gray-200 dark:border-gray-700">
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Total Dibayar</span>
+                    <span class="col-span-2 font-bold text-green-600 dark:text-green-400">Rp {{ number_format($this->selectedTagihan->jumlah - $this->selectedTagihan->bayar, 0, ',', '.') }}</span>
+                </div>
 
-            <div class="mt-4">
-                <flux:input wire:model="nominalBayar" type="number" label="Nominal Pembayaran" />
-                @error('nominalBayar') 
-                    <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> 
-                @enderror
             </div>
             
             <div class="mt-6 flex justify-end gap-2">

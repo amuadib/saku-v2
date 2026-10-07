@@ -117,8 +117,6 @@
                         <flux:modal.trigger name="export-modal">
                             <flux:button size="sm" color="green" icon="document-arrow-down">Ekspor</flux:button>
                         </flux:modal.trigger>
-                        {{-- <flux:button size="sm" color="orange" icon="pencil-square">Ubah Data</flux:button> --}}
-                        <flux:button size="sm" color="red" icon="arrow-up-circle" wire:click="prosesKenaikanKelas" wire:confirm="Anda yakin ingin memproses kenaikan kelas (dan meluluskan jika sudah tingkat akhir) untuk siswa yang dipilih?">Kenaikan kelas</flux:button>
                         <flux:button size="sm" color="red" icon="trash" wire:click="confirmBulkDelete">Hapus</flux:button>
                     </div>
                     <div class="flex flex-wrap items-center gap-3 text-sm">
@@ -152,6 +150,7 @@
                     <flux:table.column>Nama Siswa</flux:table.column>
                     <flux:table.column>Kelas</flux:table.column>
                     <flux:table.column>Status</flux:table.column>
+                    <flux:table.column>Label</flux:table.column>
                     <flux:table.column>Aksi</flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -176,7 +175,17 @@
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
+                                @if($siswa->tags->isNotEmpty())
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($siswa->tags as $tag)
+                                            <flux:badge color="blue" size="sm">{{ $tag->name }}</flux:badge>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </flux:table.cell>
+                            <flux:table.cell>
                                 <div class="flex gap-2">
+                                    <flux:button size="sm" color="purple" wire:click="generateMagicLink('{{ $siswa->id }}')" icon="link" tooltip="Magic Link"></flux:button>
                                     <flux:button size="sm" color="green" wire:click="$dispatch('open-penjualan-modal', { siswa_id: '{{ $siswa->id }}' })" icon="shopping-cart" tooltip="Penjualan"></flux:button>
                                     <flux:button size="sm" color="cyan" href="{{ route('admin.siswa.show', $siswa->id) }}" wire:navigate icon="eye" tooltip="Detail"></flux:button>
                                 </div>
@@ -262,6 +271,69 @@
 
         <div class="flex gap-2 justify-end mt-6">
             <flux:button wire:click="$set('showSyncOutputModal', false)" variant="ghost">Tutup</flux:button>
+        </div>
+    </flux:modal>
+
+    <flux:modal wire:model="showMagicLinkModal" class="md:w-[500px] space-y-6">
+        <div>
+            <flux:heading size="lg">Magic Link Login</flux:heading>
+            <flux:subheading>Link login otomatis untuk siswa: <strong>{{ $magicLinkSiswaName }}</strong></flux:subheading>
+        </div>
+
+        <div class="mt-4 flex flex-col items-center justify-center gap-4">
+            @if($magicLinkUrl)
+                @php
+                    $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+                        new \BaconQrCode\Renderer\RendererStyle\RendererStyle(192),
+                        new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+                    );
+                    $writer = new \BaconQrCode\Writer($renderer);
+                    $qrCodeSvg = $writer->writeString($magicLinkUrl);
+                @endphp
+                <div class="p-2 bg-white rounded-lg shadow-sm border border-gray-200">
+                    {!! $qrCodeSvg !!}
+                </div>
+                <div class="w-full flex gap-2" x-data="{ 
+                    copied: false, 
+                    copy() { 
+                        let input = document.getElementById('magic-link-input');
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(input.value).then(() => this.onSuccess());
+                        } else {
+                            // Fallback untuk HTTP lokal
+                            input.select();
+                            input.setSelectionRange(0, 99999); // Untuk perangkat mobile
+                            let success = false;
+                            try {
+                                success = document.execCommand('copy');
+                            } catch (err) {}
+                            
+                            if (success) {
+                                this.onSuccess();
+                            } else {
+                                Flux.toast('Gagal otomatis menyalin. Silakan copy secara manual.', 'danger');
+                            }
+                        }
+                    },
+                    onSuccess() {
+                        this.copied = true; 
+                        setTimeout(() => this.copied = false, 2000); 
+                        Flux.toast('Link disalin ke clipboard');
+                    }
+                }">
+                    <flux:input id="magic-link-input" value="{{ $magicLinkUrl }}" readonly class="flex-1" />
+                    <flux:button variant="primary" icon="clipboard-document" @click="copy()">
+                        <span x-text="copied ? 'Disalin' : 'Salin'"></span>
+                    </flux:button>
+                </div>
+                <div class="text-xs text-gray-500 text-center mt-2">
+                    Link ini berlaku selama 30 hari. Siapapun yang memiliki link atau QR code ini dapat masuk ke akun siswa tanpa password.
+                </div>
+            @endif
+        </div>
+
+        <div class="flex gap-2 justify-end mt-6">
+            <flux:button wire:click="$set('showMagicLinkModal', false)" variant="ghost">Tutup</flux:button>
         </div>
     </flux:modal>
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Tagihan;
 
+use App\Models\Kas;
 use App\Models\Tagihan;
 use App\Services\WhatsappService;
 use Illuminate\Support\Facades\Gate;
@@ -59,16 +60,14 @@ class TagihanList extends Component
 
     public function prosesPembayaran()
     {
-        $this->validate([
-            'nominalBayar' => 'required|numeric|min:1',
-        ]);
-
         $tagihan = Tagihan::findOrFail($this->selectedTagihanId);
         $sisa = $tagihan->jumlah - $tagihan->bayar;
 
-        if ($this->nominalBayar > $sisa) {
-            $this->addError('nominalBayar', 'Nominal bayar tidak boleh lebih dari sisa tagihan.');
+        // Force payment to be exact remaining balance
+        $this->nominalBayar = $sisa;
 
+        if ($this->nominalBayar <= 0) {
+            $this->addError('nominalBayar', 'Tagihan ini sudah lunas.');
             return;
         }
 
@@ -94,8 +93,8 @@ class TagihanList extends Component
                 $pesan = WhatsappService::prosesPesan(
                     $tagihan->siswa,
                     [
-                        'tagihan.rincian' => 'Pembayaran tagihan '.$tagihan->kas->nama.' '.$tagihan->keterangan,
-                        'tagihan.total' => 'Rp '.number_format($this->nominalBayar, thousands_separator: '.'),
+                        'tagihan.keterangan' => 'Pembayaran tagihan '.$tagihan->kas->nama.' '.$tagihan->keterangan,
+                        'tagihan.jumlah' => 'Rp '.number_format($this->nominalBayar, thousands_separator: '.'),
                     ],
                     'tagihan.bayar'
                 );
@@ -132,14 +131,14 @@ class TagihanList extends Component
                     $sub->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
                 });
             })
-            ->when($this->filter_kas_id !== '', function($q) {
+            ->when($this->filter_kas_id !== '', function ($q) {
                 $q->where('kas_id', $this->filter_kas_id);
             })
-            ->when($this->filter_status !== '', function($q) {
+            ->when($this->filter_status !== '', function ($q) {
                 if ($this->filter_status === 'lunas') {
                     $q->whereColumn('bayar', '>=', 'jumlah');
                 } elseif ($this->filter_status === 'belum') {
-                    $q->where(function($sub) {
+                    $q->where(function ($sub) {
                         $sub->whereNull('bayar')->orWhereColumn('bayar', '<', 'jumlah');
                     });
                 }
@@ -155,7 +154,7 @@ class TagihanList extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $kasList = \App\Models\Kas::where('ada_tagihan', true)
+        $kasList = Kas::where('ada_tagihan', true)
             ->when(! auth()->user()->isAdmin(), function ($q) {
                 $q->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
             })->get();

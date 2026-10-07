@@ -35,6 +35,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
+Route::get('/login/magic/{user}', function (User $user) {
+    if (! request()->hasValidSignature(false)) {
+        abort(401, 'Link tidak valid atau sudah kadaluarsa.');
+    }
+    auth()->login($user);
+    return redirect('/dashboard');
+})->name('login.magic');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('/dashboard', '/admin')->name('dashboard');
     

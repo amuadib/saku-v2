@@ -61,7 +61,24 @@
 
     <!-- PADDING FOR FIXED HEADER -->
     <div class="no-print h-20"></div>
-
+            @php
+                $userSiswa = \App\Models\User::where('authable_type', \App\Models\Siswa::class)
+                    ->where('authable_id', $siswa->id)
+                    ->first();
+                $qrCodeSvg = null;
+                if ($userSiswa) {
+                    $relativeUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                        'login.magic', now()->addDays(30), ['user' => $userSiswa->id], false
+                    );
+                    $magicLinkUrl = request()->getSchemeAndHttpHost() . $relativeUrl;
+                    $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+                        new \BaconQrCode\Renderer\RendererStyle\RendererStyle(150),
+                        new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+                    );
+                    $writer = new \BaconQrCode\Writer($renderer);
+                    $qrCodeSvg = $writer->writeString($magicLinkUrl);
+                }
+            @endphp
     @if(in_array($kertas, ['58', '80']))
         <!-- ================= THERMAL LAYOUT ================= -->
         <div class="thermal-print p-2 bg-white shadow print:shadow-none print:p-0">
@@ -124,9 +141,18 @@
                 Mohon simpan struk ini dengan baik.<br>
                 <b>Terima kasih.</b>
             </div>
-            <div class="text-center text-[10px] text-gray-400">
-                dicetak oleh {{ auth()->user()->name }}
-            </div>
+            
+            @if($qrCodeSvg)
+                <div class="dashed-line"></div>
+                <div class="mt-2 flex flex-col items-center text-center">
+                    <span class="text-[10px] mb-1 font-bold">Akses Akun Siswa dengan scan kode QR dibawah ini</span>
+                    <div class="w-32 h-32 mx-auto bg-white">
+                        {!! $qrCodeSvg !!}
+                    </div>
+                </div>
+                <br><br><br>
+            @endif
+
         </div>
 
     @else
@@ -229,6 +255,17 @@
             <div class="mt-12 pt-4 border-t border-gray-300 text-xs text-gray-500 italic text-center">
                 * Dokumen ini dicetak secara otomatis oleh {{ config('custom.app.singkatan') }} pada {{ now()->format('d/m/Y H:i') }}
             </div>
+
+            @if($qrCodeSvg)
+                <div class="dashed-line"></div>
+                <div class="mt-2 flex flex-col items-center text-center">
+                    <span class="text-[10px] mb-1 font-bold">Akses Akun Siswa dengan scan kode QR dibawah ini</span>
+                    <div class="w-32 h-32 mx-auto bg-white">
+                        {!! $qrCodeSvg !!}
+                    </div>
+                </div>
+                <br><br><br>
+            @endif
         </div>
     @endif
 

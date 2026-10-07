@@ -5,9 +5,11 @@ namespace App\Console\Commands;
 use App\Models\Kelas;
 use App\Models\Periode;
 use App\Models\Siswa;
+use App\Models\Tag;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -137,7 +139,7 @@ class SyncSiswaData extends Command
                                 $updateData[$field] = $incomingValue;
                             }
                         }
-                        
+
                         // Selalu gunakan periode_id aktif lokal sesuai instruksi
                         $updateData['periode_id'] = $activePeriode->id;
 
@@ -146,7 +148,7 @@ class SyncSiswaData extends Command
                                 // Jika ID berbeda (hasil pencarian fallback), update ID (UUID) lama dengan yang baru.
                                 // Akan meng-cascade update_id di relasi lainnya secara otomatis.
                                 $updateData['updated_at'] = now();
-                                \Illuminate\Support\Facades\DB::table('kelas')
+                                DB::table('kelas')
                                     ->where('id', $existingKelas->id)
                                     ->update($updateData);
                             } else {
@@ -170,6 +172,7 @@ class SyncSiswaData extends Command
                 if (empty($payload['siswa'])) {
                     $this->warn('Data siswa dari API kosong. Proses sinkronisasi selesai.');
                     Log::warning('SyncSiswaData: Data siswa dari API kosong.');
+
                     return;
                 }
 
@@ -181,9 +184,8 @@ class SyncSiswaData extends Command
                 $kelasSlugMap = Kelas::pluck('id', 'nama')->mapWithKeys(function ($id, $nama) {
                     return [Str::slug($nama) => $id];
                 })->toArray();
-                $faker = \Faker\Factory::create('id_ID');
 
-                $allTags = \App\Models\Tag::all()->keyBy(function ($t) {
+                $allTags = Tag::all()->keyBy(function ($t) {
                     return Str::slug($t->name);
                 });
 
@@ -191,6 +193,7 @@ class SyncSiswaData extends Command
                     // Jika nama dan NISN kosong, lewati dan catat
                     if (empty($data['nama']) && empty($data['nisn'])) {
                         $skippedSiswa[] = $data['id'] ?? 'Tanpa ID';
+
                         continue;
                     }
 
@@ -217,41 +220,61 @@ class SyncSiswaData extends Command
                     }
 
                     $updateData = [];
-                    // Gunakan Faker jika nama juga kosong (kasus nama kosong tapi NISN ada)
-                    $updateData['nama'] = ! empty($data['nama']) ? $data['nama'] : ($existingSiswa && ! empty($existingSiswa->nama) ? $existingSiswa->nama : $faker->name());
-                    
+                    // Gunakan Str::random jika nama juga kosong (kasus nama kosong tapi NISN ada)
+                    $updateData['nama'] = ! empty($data['nama']) ? $data['nama'] : ($existingSiswa && ! empty($existingSiswa->nama) ? $existingSiswa->nama : Str::random(10));
+
                     // Payload API terbaru mengirimkan 'rombel_nama' untuk pencocokan kelas
                     $incomingKelasId = null;
-                    if (!empty($data['rombel_nama'])) {
+                    if (! empty($data['rombel_nama'])) {
                         $rombelSlug = Str::slug($data['rombel_nama']);
                         $incomingKelasId = $kelasSlugMap[$rombelSlug] ?? null;
 
-                        if (!$incomingKelasId) {
+                        if (! $incomingKelasId) {
                             Log::warning("SyncSiswaData: Kelas dengan nama '{$data['rombel_nama']}' tidak ditemukan untuk siswa {$data['nama']}. kelas_id diabaikan.");
                         }
                     } else {
                         // Fallback jika API masih mengirim format lama (rombel_id / kelas_id)
                         $incomingKelasId = $data['rombel_id'] ?? ($data['kelas_id'] ?? null);
-                        
-                        if ($incomingKelasId && !isset($validKelasIds[$incomingKelasId])) {
+
+                        if ($incomingKelasId && ! isset($validKelasIds[$incomingKelasId])) {
                             Log::warning("SyncSiswaData: Siswa {$data['nama']} ({$data['id']}) memiliki rombel_id {$incomingKelasId} yang tidak ditemukan di tabel kelas lokal. kelas_id diabaikan.");
                             $incomingKelasId = null;
                         }
                     }
-                    
+
                     $updateData['kelas_id'] = ! empty($incomingKelasId) ? $incomingKelasId : ($existingSiswa ? $existingSiswa->kelas_id : null);
 
                     $fields = [
-                        'nis' => function () use ($faker) { return $faker->numerify('##########'); },
-                        'nisn' => function () use ($faker) { return $faker->numerify('##########'); },
-                        'status' => function () { return 1; },
-                        'lembaga_id' => function () { return null; },
-                        'nik' => function () use ($faker) { return $faker->nik(); },
-                        'tempat_lahir' => function () use ($faker) { return $faker->city(); },
-                        'tanggal_lahir' => function () use ($faker) { return $faker->date('Y-m-d', '2015-12-31'); },
-                        'jenis_kelamin' => function () use ($faker) { return $faker->randomElement(['l', 'p']); },
-                        'alamat' => function () use ($faker) { return $faker->address(); },
-                        'telepon' => function () use ($faker) { return $faker->phoneNumber(); },
+                        'nis' => function () {
+                            return substr(str_shuffle(str_repeat('0123456789', 2)), 0, 6);
+                        },
+                        'nisn' => function () {
+                            return substr(str_shuffle(str_repeat('0123456789', 2)), 0, 10);
+                        },
+                        'status' => function () {
+                            return 1;
+                        },
+                        'lembaga_id' => function () {
+                            return null;
+                        },
+                        'nik' => function () {
+                            return substr(str_shuffle(str_repeat('0123456789', 2)), 0, 16);
+                        },
+                        'tempat_lahir' => function () {
+                            return 'rnd_'.Str::random(4);
+                        },
+                        'tanggal_lahir' => function () {
+                            return '2015-01-01';
+                        },
+                        'jenis_kelamin' => function () {
+                            return ['l', 'p'][array_rand(['l', 'p'])];
+                        },
+                        'alamat' => function () {
+                            return 'rnd_'.Str::random(20);
+                        },
+                        'telepon' => function () {
+                            return substr(str_shuffle(str_repeat('0123456789', 2)), 0, 12);
+                        },
                     ];
 
                     foreach ($fields as $field => $defaultGenerator) {
@@ -280,13 +303,15 @@ class SyncSiswaData extends Command
                     if (isset($data['tags']) && is_array($data['tags'])) {
                         $tagIds = [];
                         foreach ($data['tags'] as $tagData) {
-                            if (empty($tagData['nama'])) continue;
+                            if (empty($tagData['nama'])) {
+                                continue;
+                            }
 
                             $slugTag = Str::slug($tagData['nama']);
                             $tag = $allTags->get($slugTag);
 
-                            if (!$tag) {
-                                $tag = new \App\Models\Tag();
+                            if (! $tag) {
+                                $tag = new Tag;
                                 $tag->name = $tagData['nama'];
                                 $tag->save();
                                 $allTags->put($slugTag, $tag);
@@ -303,7 +328,7 @@ class SyncSiswaData extends Command
                 Log::info("SyncSiswaData: Berhasil sinkronisasi {$syncedCount} data siswa.");
 
                 if (count($skippedSiswa) > 0) {
-                    $this->warn('Terdapat ' . count($skippedSiswa) . ' data siswa yang dilewati karena field nama & NISN kosong.');
+                    $this->warn('Terdapat '.count($skippedSiswa).' data siswa yang dilewati karena field nama & NISN kosong.');
                     Log::warning('SyncSiswaData: Data siswa dilewati karena nama & NISN kosong', $skippedSiswa);
                 }
             } else {

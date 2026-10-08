@@ -221,7 +221,8 @@ class SyncSiswaData extends Command
 
                     $updateData = [];
                     // Gunakan Str::random jika nama juga kosong (kasus nama kosong tapi NISN ada)
-                    $updateData['nama'] = ! empty($data['nama']) ? $data['nama'] : ($existingSiswa && ! empty($existingSiswa->nama) ? $existingSiswa->nama : Str::random(10));
+                    $rawNama = ! empty($data['nama']) ? $data['nama'] : ($existingSiswa && ! empty($existingSiswa->nama) ? $existingSiswa->nama : Str::random(10));
+                    $updateData['nama'] = Str::upper(trim($rawNama));
 
                     // Payload API terbaru mengirimkan 'rombel_nama' untuk pencocokan kelas
                     $incomingKelasId = null;

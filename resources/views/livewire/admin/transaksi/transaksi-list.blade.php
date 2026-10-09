@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Data Transaksi (Buku Besar)
             </h2>
-            <flux:button variant="primary" href="{{ route('admin.transaksi.create') }}" wire:navigate>Tambah Manual</flux:button>
+            <flux:button variant="primary" href="{{ route('admin.transaksi.create') }}" wire:navigate>Transaksi Manual</flux:button>
         </div>
     </x-slot>
 
@@ -23,7 +23,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>Kode / Waktu</flux:table.column>
-                    <flux:table.column>Sumber (Jenis)</flux:table.column>
+                    <flux:table.column>Jenis</flux:table.column>
                     <flux:table.column>Nominal</flux:table.column>
                     <flux:table.column>Keterangan</flux:table.column>
                     <flux:table.column>Petugas</flux:table.column>
@@ -43,9 +43,15 @@
                                     <flux:badge color="red">Tagihan</flux:badge>
                                 @elseif (class_basename($transaksi->transable_type) === 'Penjualan')
                                     <flux:badge color="blue">Penjualan</flux:badge>
+                                @elseif (class_basename($transaksi->transable_type) === 'Kas')
+                                    <flux:badge color="yellow">{{ $transaksi->transable->nama }}</flux:badge>
                                 @endif
                             </flux:table.cell>
-                            <flux:table.cell>Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}</flux:table.cell>
+                            <flux:table.cell>
+                                <span class="font-semibold {{ $transaksi->kode[0] == 'M' ? 'text-green-600' : 'text-red-600' }}">
+                                    Rp {{ number_format(abs($transaksi->jumlah), 0, ',', '.') }}
+                                </span>
+                            </flux:table.cell>
                             <flux:table.cell>
                                     {{ $transaksi->keterangan }}
                             </flux:table.cell>

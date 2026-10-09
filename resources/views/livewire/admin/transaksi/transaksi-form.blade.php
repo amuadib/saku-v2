@@ -12,9 +12,38 @@
         <div class="p-6">
             <form wire:submit="save">
                 <div class="space-y-6">
-                    
                     <flux:field>
-                        <flux:label>Kas / Rekening</flux:label>
+                            <flux:label>Jenis Transaksi</flux:label>
+                            <flux:radio.group wire:model.live="jenis">
+                                    <flux:radio value="tun" label="Tunai" />
+                                    <flux:radio value="trf" label="Transfer Antar Kas" />
+                            </flux:radio.group>
+                        </flux:field>
+
+                    @if($jenis == 'tun')
+                    <flux:field>
+                            <flux:label>Mutasi</flux:label>
+                            <flux:radio.group wire:model.live="mutasi">
+                                    <flux:radio value="masuk" label="Masuk" />
+                                    <flux:radio value="keluar" label="Keluar" />
+                            </flux:radio.group>
+                    </flux:field>
+                    @endif
+
+                    @if(auth()->check() && auth()->user()->isAdmin())
+                        <flux:field>
+                            <flux:label>Lembaga</flux:label>
+                            <flux:radio.group wire:model.live="lembaga_id">
+                                @foreach($lembagas as $id => $nama)
+                                    <flux:radio value="{{ $id }}" label="{{ $nama }}" />
+                                @endforeach
+                            </flux:radio.group>
+                        </flux:field>
+                    @endif
+
+                    @if($jenis == 'tun')
+                    <flux:field>
+                        <flux:label>Kas</flux:label>
                         <flux:select wire:model="kas_id" placeholder="Pilih Kas">
                             @foreach($kas_items as $k)
                                 <flux:select.option value="{{ $k->id }}">{{ $k->nama }}</flux:select.option>
@@ -22,12 +51,47 @@
                         </flux:select>
                         <flux:error name="kas_id" />
                     </flux:field>
+                    @else
+                    <flux:field>
+                        <flux:label>Kas Asal</flux:label>
+                        <flux:select wire:model="kas_id_asal" placeholder="Pilih Kas">
+                            @foreach($kas_items as $k)
+                                <flux:select.option value="{{ $k->id }}">{{ $k->nama }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="kas_id_asal" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>Kas Tujuan</flux:label>
+                        <flux:select wire:model="kas_id_tujuan" placeholder="Pilih Kas">
+                            @foreach($kas_items as $k)
+                                <flux:select.option value="{{ $k->id }}">{{ $k->nama }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="kas_id_tujuan" />
+                    </flux:field>
+                    @endif
 
                     <flux:field>
                         <flux:label>Jumlah (Nominal)</flux:label>
-                        <flux:input type="number" wire:model="jumlah" placeholder="Gunakan minus (-) untuk pengeluaran" />
+                        <div x-data="{
+                            raw: @entangle('jumlah'),
+                            formatted: '',
+                            init() {
+                                this.formatted = this.raw ? this.raw.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+                                this.$watch('raw', value => {
+                                    this.formatted = value ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+                                });
+                            },
+                            formatInput() {
+                                let clean = this.formatted.toString().replace(/\D/g, '');
+                                this.raw = clean;
+                                this.formatted = clean.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                            }
+                        }">
+                            <flux:input type="text" x-model="formatted" @input="formatInput" placeholder="Masukkan jumlah transaksi" />
+                        </div>
                         <flux:error name="jumlah" />
-                        <p class="text-xs text-gray-500 mt-1">Gunakan angka positif untuk pemasukan, dan angka negatif (contoh: -50000) untuk pengeluaran.</p>
                     </flux:field>
 
                     <flux:field>

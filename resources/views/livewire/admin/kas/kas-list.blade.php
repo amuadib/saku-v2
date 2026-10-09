@@ -34,6 +34,7 @@
                     <flux:table.column>Saldo</flux:table.column>
                     <flux:table.column>Ada Tagihan</flux:table.column>
                     <flux:table.column>Tabungan</flux:table.column>
+                    <flux:table.column>Penjualan</flux:table.column>
                     <flux:table.column>Aksi</flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -52,6 +53,13 @@
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if($kas->tabungan)
+                                    <flux:badge color="green">Ya</flux:badge>
+                                @else
+                                    <flux:badge color="gray">Tidak</flux:badge>
+                                @endif
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                @if($kas->penjualan)
                                     <flux:badge color="green">Ya</flux:badge>
                                 @else
                                     <flux:badge color="gray">Tidak</flux:badge>

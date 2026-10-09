@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Kas;
 
 use App\Models\Kas;
+use App\Models\Transaksi;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -45,19 +47,20 @@ class KasList extends Component
 
         if ($kas->saldo <= 0) {
             session()->flash('error', 'Saldo kas kosong, tidak ada dana yang bisa disetor.');
+
             return;
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($kas) {
-            $todayCount = \App\Models\Transaksi::whereDate('created_at', today())->count();
-            $baseKode = date('Ymd') . str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
+        DB::transaction(function () use ($kas) {
+            $todayCount = Transaksi::whereDate('created_at', today())->count();
+            $baseKode = date('Ymd').str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
             $kode = 'KTX'.$baseKode;
 
-            $transaksi = new \App\Models\Transaksi;
+            $transaksi = new Transaksi;
             $transaksi->transable_type = Kas::class;
             $transaksi->transable_id = $kas->id;
             $transaksi->jumlah = -abs($kas->saldo);
-            $transaksi->keterangan = 'Setor Dana Kas ' . $kas->nama;
+            $transaksi->keterangan = 'Setor Dana Kas '.$kas->nama;
             $transaksi->user_id = auth()->id();
             $transaksi->kode = $kode;
             $transaksi->save();
@@ -65,9 +68,8 @@ class KasList extends Component
             $kas->update(['saldo' => 0]);
         });
 
-        session()->flash('message', 'Dana berhasil disetor, saldo kas kini 0.');
+        session()->flash('message', 'Dana Kas '.$kas->nama.' berhasil disetor.');
     }
-
 
     public function render()
     {

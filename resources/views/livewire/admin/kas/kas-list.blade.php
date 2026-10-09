@@ -75,12 +75,9 @@
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if($kas->setoran)
-                                    {{-- button setor dana --}}
                                     <flux:button size="sm" wire:click="setorDana('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menyetor dana ini? Saldo kas akan di-reset menjadi 0." icon="banknotes" color="green"></flux:button>
                                 @endif
-                                {{-- button edit kas --}}
                                 <flux:button size="sm" href="{{ route('admin.kas.edit', $kas->id) }}" wire:navigate icon="pencil" color="yellow"></flux:button>
-                                {{-- button delete kas --}}
                                 <flux:button size="sm" variant="danger" wire:click="delete('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus kas ini?" icon="trash"></flux:button>
                             </flux:table.cell>
                         </flux:table.row>

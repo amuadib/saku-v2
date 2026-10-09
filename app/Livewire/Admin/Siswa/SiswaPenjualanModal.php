@@ -219,7 +219,7 @@ class SiswaPenjualanModal extends Component
                     'harga' => $item['harga'],
                     'total' => $item['total'],
                 ]);
-                
+
                 // Kurangi stok barang
                 $barang = Barang::find($item['barang_id']);
                 if ($barang) {

@@ -34,7 +34,7 @@ class TabunganList extends Component
     public function render()
     {
         $tabungans = Tabungan::with(['siswa', 'kas'])
-            ->when(!auth()->user()->isAdmin(), function ($q) {
+            ->when(! auth()->user()->isAdmin(), function ($q) {
                 $q->whereHas('siswa', function ($sub) {
                     $sub->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
                 });

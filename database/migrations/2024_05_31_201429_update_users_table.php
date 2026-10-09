@@ -20,7 +20,7 @@ return new class extends Migration
             $table->dropColumn([
                 'name',
                 'email',
-                'email_verified_at'
+                'email_verified_at',
             ]);
         });
     }

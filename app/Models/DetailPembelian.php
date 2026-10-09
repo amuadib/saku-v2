@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DetailPembelian extends Model
 {
     use HasUuids;
+
     protected $table = 'detail_pembelian';
+
     public $timestamps = false;
 
     public function barang(): BelongsTo

@@ -2,17 +2,20 @@
 
 namespace App\Livewire\Admin\Pengaduan;
 
-use Livewire\Component;
 use App\Models\Pengaduan;
 use App\Models\Siswa;
+use Livewire\Component;
 
 class PengaduanForm extends Component
 {
     public ?Pengaduan $pengaduan = null;
-    
+
     public $siswa_id = '';
+
     public $laporan = '';
+
     public $status = '0';
+
     public $keterangan = '';
 
     protected function rules()
@@ -25,7 +28,7 @@ class PengaduanForm extends Component
         ];
     }
 
-    public function mount(Pengaduan $pengaduan = null)
+    public function mount(?Pengaduan $pengaduan = null)
     {
         if ($pengaduan && $pengaduan->exists) {
             $this->pengaduan = $pengaduan;
@@ -63,7 +66,7 @@ class PengaduanForm extends Component
         $siswa_list = Siswa::select('id', 'nama', 'nis')->orderBy('nama')->get();
 
         return view('livewire.admin.pengaduan.pengaduan-form', [
-            'siswa_list' => $siswa_list
+            'siswa_list' => $siswa_list,
         ])->layout('components.admin-layout');
     }
 }

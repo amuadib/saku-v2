@@ -2,20 +2,20 @@
 
 namespace App\Livewire\Admin\Pembelian;
 
-use Livewire\Component;
-use App\Models\Pembelian;
-use App\Models\DetailPembelian;
-use App\Models\Supplier;
 use App\Models\Barang;
+use App\Models\Pembelian;
+use App\Models\Supplier;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class PembelianForm extends Component
 {
     public ?Pembelian $pembelian = null;
-    
+
     public $kode = '';
+
     public $supplier_id = '';
-    
+
     // Array of detail items
     // format: [['barang_id' => '', 'jumlah' => 1, 'harga' => 0, 'total' => 0]]
     public $items = [];
@@ -35,13 +35,13 @@ class PembelianForm extends Component
         ];
     }
 
-    public function mount(Pembelian $pembelian = null)
+    public function mount(?Pembelian $pembelian = null)
     {
         if ($pembelian && $pembelian->exists) {
             $this->pembelian = $pembelian;
             $this->kode = $pembelian->kode;
             $this->supplier_id = $pembelian->supplier_id;
-            
+
             foreach ($pembelian->detail as $detail) {
                 $this->items[] = [
                     'id' => $detail->id, // track existing id
@@ -53,7 +53,7 @@ class PembelianForm extends Component
             }
             $this->calculateTotal();
         } else {
-            $this->kode = 'PB-' . strtoupper(Str::random(6));
+            $this->kode = 'PB-'.strtoupper(Str::random(6));
             $this->addItem();
         }
     }
@@ -119,7 +119,7 @@ class PembelianForm extends Component
 
         if ($this->pembelian && $this->pembelian->exists) {
             $this->pembelian->update($pembelianData);
-            
+
             // Re-sync details. For simplicity, delete old and recreate
             $this->pembelian->detail()->delete();
             foreach ($this->items as $item) {
@@ -130,7 +130,7 @@ class PembelianForm extends Component
                     'total' => $item['total'],
                 ]);
             }
-            
+
             session()->flash('message', 'Pembelian berhasil diperbarui.');
         } else {
             $pembelian = Pembelian::create($pembelianData);
@@ -142,7 +142,7 @@ class PembelianForm extends Component
                     'total' => $item['total'],
                 ]);
             }
-            
+
             session()->flash('message', 'Pembelian berhasil ditambahkan.');
         }
 
@@ -156,7 +156,7 @@ class PembelianForm extends Component
 
         return view('livewire.admin.pembelian.pembelian-form', [
             'suppliers' => $suppliers,
-            'barangs' => $barangs
+            'barangs' => $barangs,
         ])->layout('components.admin-layout');
     }
 }

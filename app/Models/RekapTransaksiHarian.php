@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RekapTransaksiHarian extends Model
 {
     use HasUuids;
+
     protected $table = 'rekap_transaksi_harian';
 
-    public function scopePeriode($query, string $kas_id = 'All', string $start = null, string $finish = null)
+    public function scopePeriode($query, string $kas_id = 'All', ?string $start = null, ?string $finish = null)
     {
         if (empty($start)) {
             $start = (date('D') != 'Sun') ? date('Y-m-d', strtotime('last Sunday')) : date('Y-m-d');
@@ -22,7 +23,7 @@ class RekapTransaksiHarian extends Model
         $query
             ->join('kas', 'kas_id', '=', 'kas.id')
             ->when(
-                !auth()->user()->isAdmin(),
+                ! auth()->user()->isAdmin(),
                 function ($w) {
                     $w
                         ->where('kas.lembaga_id', auth()->user()->authable->lembaga_id);
@@ -41,7 +42,7 @@ class RekapTransaksiHarian extends Model
             ->selectRaw('`rekap_transaksi_harian`.`id`, `kas_id`, `kas`.`nama` as `kas`, `tanggal`, `masuk`, `keluar`');
     }
 
-    public static function getSaldoAwal(string $kas_id = 'All', string $date = null)
+    public static function getSaldoAwal(string $kas_id = 'All', ?string $date = null)
     {
         if (empty($date)) {
             return 0;
@@ -50,7 +51,7 @@ class RekapTransaksiHarian extends Model
         return self::query()
             ->join('kas', 'kas_id', '=', 'kas.id')
             ->when(
-                !auth()->user()->isAdmin(),
+                ! auth()->user()->isAdmin(),
                 function ($w) {
                     $w
                         ->where('kas.lembaga_id', auth()->user()->authable->lembaga_id);
@@ -68,10 +69,11 @@ class RekapTransaksiHarian extends Model
             ->value('saldo') ?? 0;
     }
 
-    public function scopeRekapMingguan($query, string $kas_id = 'All', string $start = null, string $finish = null)
+    public function scopeRekapMingguan($query, string $kas_id = 'All', ?string $start = null, ?string $finish = null)
     {
         return $this->scopePeriode($query, $kas_id, $start, $finish);
     }
+
     public function kas(): BelongsTo
     {
         return $this->belongsTo(Kas::class);

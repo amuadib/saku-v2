@@ -1,4 +1,5 @@
 <?php
+
 $models = [
     'Siswa.php',
     'Barang.php',
@@ -16,13 +17,13 @@ $models = [
     'Anggota.php',
 ];
 
-$dir = __DIR__ . '/app/Models/';
+$dir = __DIR__.'/app/Models/';
 
 foreach ($models as $model) {
-    $path = $dir . $model;
+    $path = $dir.$model;
     if (file_exists($path)) {
         $content = file_get_contents($path);
-        
+
         // Skip if already has CatatAktivitas
         if (strpos($content, 'use App\Traits\CatatAktivitas;') !== false) {
             continue;

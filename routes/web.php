@@ -8,6 +8,7 @@ use App\Livewire\Admin\Kas\KasForm;
 use App\Livewire\Admin\Kas\KasList;
 use App\Livewire\Admin\Kelas\KelasForm;
 use App\Livewire\Admin\Kelas\KelasList;
+use App\Livewire\Admin\LogAktivitas\LogAktivitasList;
 use App\Livewire\Admin\Pembelian\PembelianForm;
 use App\Livewire\Admin\Pembelian\PembelianList;
 use App\Livewire\Admin\Pengaduan\PengaduanForm;
@@ -29,7 +30,8 @@ use App\Livewire\Admin\Transaksi\TransaksiForm;
 use App\Livewire\Admin\Transaksi\TransaksiList;
 use App\Livewire\Admin\User\UserForm;
 use App\Livewire\Admin\User\UserList;
-use App\Livewire\Admin\LogAktivitas\LogAktivitasList;
+use App\Livewire\Siswa\Informasi;
+use App\Livewire\Siswa\Profil;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -40,15 +42,16 @@ Route::get('/login/magic/{user}', function (User $user) {
         abort(401, 'Link tidak valid atau sudah kadaluarsa.');
     }
     auth()->login($user);
+
     return redirect('/dashboard');
 })->name('login.magic');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('/dashboard', '/admin')->name('dashboard');
-    
+
     // Route khusus Siswa
-    Route::get('/informasi', \App\Livewire\Siswa\Informasi::class)->name('siswa.informasi');
-    Route::get('/profil', \App\Livewire\Siswa\Profil::class)->name('siswa.profil');
+    Route::get('/informasi', Informasi::class)->name('siswa.informasi');
+    Route::get('/profil', Profil::class)->name('siswa.profil');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {

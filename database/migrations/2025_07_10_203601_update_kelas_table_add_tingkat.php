@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Kelas;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +15,7 @@ return new class extends Migration
             $table->integer('tingkat')
                 ->nullable();
         });
-        \DB::statement("UPDATE `kelas` SET `tingkat` = SUBSTR(`nama`,1,1) WHERE SUBSTR(`nama`,1,1)<>'L';");
+        DB::statement("UPDATE `kelas` SET `tingkat` = SUBSTR(`nama`,1,1) WHERE SUBSTR(`nama`,1,1)<>'L';");
     }
 
     /**

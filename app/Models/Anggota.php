@@ -10,5 +10,6 @@ class Anggota extends Model
 {
     use CatatAktivitas;
     use HasUuids;
+
     protected $table = 'anggota';
 }

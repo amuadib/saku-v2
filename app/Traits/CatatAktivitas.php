@@ -15,7 +15,9 @@ trait CatatAktivitas
     public static function bootCatatAktivitas()
     {
         static::created(function ($model) {
-            if ($model->disableLogging) return;
+            if ($model->disableLogging) {
+                return;
+            }
 
             LogAktivitas::create([
                 'user_id' => auth()->id(),
@@ -29,23 +31,27 @@ trait CatatAktivitas
         });
 
         static::updated(function ($model) {
-            if ($model->disableLogging) return;
+            if ($model->disableLogging) {
+                return;
+            }
 
             // Only log if there are actual changes
-            if (!empty($model->getChanges())) {
+            if (! empty($model->getChanges())) {
                 $dataLama = [];
                 $dataBaru = [];
-                
+
                 // Get the changed attributes
                 foreach ($model->getChanges() as $key => $value) {
                     // Ignore updated_at column
-                    if ($key === $model->getUpdatedAtColumn()) continue;
+                    if ($key === $model->getUpdatedAtColumn()) {
+                        continue;
+                    }
 
                     $dataLama[$key] = $model->getOriginal($key);
                     $dataBaru[$key] = $value;
                 }
 
-                if (!empty($dataLama)) {
+                if (! empty($dataLama)) {
                     LogAktivitas::create([
                         'user_id' => auth()->id(),
                         'model' => get_class($model),
@@ -60,7 +66,9 @@ trait CatatAktivitas
         });
 
         static::deleted(function ($model) {
-            if ($model->disableLogging) return;
+            if ($model->disableLogging) {
+                return;
+            }
 
             LogAktivitas::create([
                 'user_id' => auth()->id(),

@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\Siswa;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -24,29 +26,29 @@ return new class extends Migration
         });
 
         // Migrate existing label data from siswa table to tags
-        $siswas = \Illuminate\Support\Facades\DB::table('siswa')->whereNotNull('label')->get();
+        $siswas = DB::table('siswa')->whereNotNull('label')->get();
         $tagsCache = [];
-        
+
         foreach ($siswas as $siswa) {
             $labels = json_decode($siswa->label, true);
             if (is_array($labels)) {
                 foreach ($labels as $labelId) {
                     $labelName = config("custom.siswa.label.$labelId");
                     if ($labelName) {
-                        if (!isset($tagsCache[$labelName])) {
-                            $tagId = \Illuminate\Support\Facades\DB::table('tags')->insertGetId([
+                        if (! isset($tagsCache[$labelName])) {
+                            $tagId = DB::table('tags')->insertGetId([
                                 'name' => $labelName,
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ]);
                             $tagsCache[$labelName] = $tagId;
                         }
-                        
+
                         // Ignore duplicates
-                        \Illuminate\Support\Facades\DB::table('taggables')->insertOrIgnore([
+                        DB::table('taggables')->insertOrIgnore([
                             'tag_id' => $tagsCache[$labelName],
                             'taggable_id' => $siswa->id,
-                            'taggable_type' => \App\Models\Siswa::class,
+                            'taggable_type' => Siswa::class,
                         ]);
                     }
                 }

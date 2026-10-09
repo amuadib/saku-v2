@@ -5,7 +5,6 @@ namespace App\Livewire\Admin\Transaksi;
 use App\Models\Kas;
 use App\Models\Transaksi;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class TransaksiForm extends Component
@@ -59,7 +58,7 @@ class TransaksiForm extends Component
         $this->validate($rules, $messages);
 
         $todayCount = Transaksi::whereDate('created_at', today())->count();
-        $baseKode = date('Ymd') . str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
+        $baseKode = date('Ymd').str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($baseKode) {
             // $lembagaId = null;

@@ -33,12 +33,12 @@ class BarangList extends Component
 
     public function render()
     {
-        $barangs = Barang::when(!auth()->user()->isAdmin(), function ($q) {
-                $q->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
-            })
+        $barangs = Barang::when(! auth()->user()->isAdmin(), function ($q) {
+            $q->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
+        })
             ->where(function ($q) {
                 $q->where('nama', 'like', '%'.$this->search.'%')
-                  ->orWhere('kode', 'like', '%'.$this->search.'%');
+                    ->orWhere('kode', 'like', '%'.$this->search.'%');
             })
             ->latest()
             ->paginate(10);

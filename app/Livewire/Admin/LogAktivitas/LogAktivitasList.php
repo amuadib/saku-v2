@@ -24,8 +24,9 @@ class LogAktivitasList extends Component
         $log = LogAktivitas::findOrFail($id);
         $modelClass = $log->model;
 
-        if (!class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             \Flux::toast('Class model tidak ditemukan.', variant: 'danger');
+
             return;
         }
 
@@ -61,7 +62,7 @@ class LogAktivitasList extends Component
 
             \Flux::toast('Aktivitas berhasil di-undo.', variant: 'success');
         } catch (\Exception $e) {
-            \Flux::toast('Gagal melakukan undo: ' . $e->getMessage(), variant: 'danger');
+            \Flux::toast('Gagal melakukan undo: '.$e->getMessage(), variant: 'danger');
         }
     }
 
@@ -69,17 +70,17 @@ class LogAktivitasList extends Component
     {
         $logs = LogAktivitas::with('user')
             ->where(function ($query) {
-                $query->where('model', 'like', '%' . $this->search . '%')
-                    ->orWhere('aksi', 'like', '%' . $this->search . '%')
+                $query->where('model', 'like', '%'.$this->search.'%')
+                    ->orWhere('aksi', 'like', '%'.$this->search.'%')
                     ->orWhereHas('user', function ($q) {
-                        $q->where('username', 'like', '%' . $this->search . '%');
+                        $q->where('username', 'like', '%'.$this->search.'%');
                     });
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return view('livewire.admin.log-aktivitas.log-aktivitas-list', [
-            'logs' => $logs
+            'logs' => $logs,
         ])->layout('components.admin-layout');
     }
 }

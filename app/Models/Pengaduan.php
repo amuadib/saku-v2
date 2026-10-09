@@ -11,6 +11,7 @@ class Pengaduan extends Model
 {
     use CatatAktivitas;
     use HasUuids;
+
     protected $table = 'pengaduan';
 
     public function siswa(): BelongsTo

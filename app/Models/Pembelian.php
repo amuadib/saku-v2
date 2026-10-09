@@ -12,15 +12,19 @@ class Pembelian extends Model
 {
     use CatatAktivitas;
     use HasUuids;
+
     protected $table = 'pembelian';
+
     public function supplier(): BelongsTo
     {
         return $this->BelongsTo(Supplier::class, 'supplier_id');
     }
+
     public function petugas(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function detail(): HasMany
     {
         return $this->HasMany(DetailPembelian::class, 'pembelian_id');

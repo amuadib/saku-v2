@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CatatAktivitas;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 class User extends Authenticatable
 {
     use CatatAktivitas;
-    use HasUuids, Notifiable;
+    use HasFactory, HasUuids, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -46,6 +47,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     public function authable()
     {
         return $this->morphTo();
@@ -67,36 +69,42 @@ class User extends Authenticatable
         $name = $this->name;
         $words = explode(' ', $name);
         if (count($words) >= 2) {
-            return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+            return strtoupper(substr($words[0], 0, 1).substr($words[1], 0, 1));
         }
-        
+
         return strtoupper(substr($name, 0, 2));
     }
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->authable->foto && Storage::disk('public')->exists($this->authable->foto) ? url('/storage/' . $this->authable->foto) : env('AVATAR_PROVIDER', 'https://ui-avatars.com/api/?rounded=true&background=09090b&color=fbac1e&name=') . urlencode($this->authable->nama);
+        return $this->authable->foto && Storage::disk('public')->exists($this->authable->foto) ? url('/storage/'.$this->authable->foto) : env('AVATAR_PROVIDER', 'https://ui-avatars.com/api/?rounded=true&background=09090b&color=fbac1e&name=').urlencode($this->authable->nama);
     }
+
     public function getFilamentName(): string
     {
         return $this->authable->nama;
     }
+
     public function isAdmin(): bool
     {
         return $this->role_id === 1;
     }
+
     public function isKepala(): bool
     {
         return $this->role_id === 3;
     }
+
     public function isPetugas(): bool
     {
         return $this->role_id <= 4;
     }
+
     public function isTataUsaha(): bool
     {
         return in_array($this->role_id, [1, 4]);
     }
+
     public function canImpersonate()
     {
         return $this->role_id === 1;

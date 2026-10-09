@@ -68,6 +68,7 @@ class TagihanList extends Component
 
         if ($this->nominalBayar <= 0) {
             $this->addError('nominalBayar', 'Tagihan ini sudah lunas.');
+
             return;
         }
 

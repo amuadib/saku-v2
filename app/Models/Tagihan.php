@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Tagihan extends Model
 {
     use CatatAktivitas;
+
     // use HasFactory;
     use HasUuids;
 

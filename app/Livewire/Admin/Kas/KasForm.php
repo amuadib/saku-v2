@@ -12,6 +12,8 @@ class KasForm extends Component
 
     public $nama = '';
 
+    public $lembaga_id = '';
+
     public $keterangan = '';
 
     public $saldo = 0;
@@ -22,6 +24,8 @@ class KasForm extends Component
 
     public $penjualan = false;
 
+    public $setoran = false;
+
     // We skip array/json fields for simple CRUD or initialize them empty
     public $jenis_transaksi = [];
 
@@ -31,11 +35,13 @@ class KasForm extends Component
     {
         return [
             'nama' => 'required|string|max:255',
+            'lembaga_id' => 'required|integer',
             'keterangan' => 'nullable|string',
             'saldo' => 'required|numeric|min:0',
             'ada_tagihan' => 'boolean',
             'tabungan' => 'boolean',
             'penjualan' => 'boolean',
+            'setoran' => 'boolean',
         ];
     }
 
@@ -45,11 +51,13 @@ class KasForm extends Component
             Gate::authorize('update', $kas);
             $this->kas = $kas;
             $this->nama = $kas->nama;
+            $this->lembaga_id = $kas->lembaga_id;
             $this->keterangan = $kas->keterangan;
             $this->saldo = $kas->saldo;
             $this->ada_tagihan = $kas->ada_tagihan;
             $this->tabungan = $kas->tabungan;
             $this->penjualan = $kas->penjualan;
+            $this->setoran = $kas->setoran;
             $this->jenis_transaksi = $kas->jenis_transaksi ?? [];
             $this->aturan_tagihan = $kas->aturan_tagihan ?? [];
         } else {
@@ -68,7 +76,8 @@ class KasForm extends Component
             'ada_tagihan' => $this->ada_tagihan,
             'tabungan' => $this->tabungan,
             'penjualan' => $this->penjualan,
-            'lembaga_id' => auth()->user()->authable->lembaga_id ?? 99,
+            'setoran' => $this->setoran,
+            'lembaga_id' => $this->lembaga_id,
         ];
 
         if ($this->kas && $this->kas->exists) {

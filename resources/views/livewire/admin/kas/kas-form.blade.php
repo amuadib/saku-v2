@@ -13,6 +13,17 @@
             <form wire:submit="save" class="space-y-6">
                 
                 <flux:field>
+                    <flux:label>Lembaga</flux:label>
+                    <flux:select wire:model="lembaga_id" placeholder="Pilih Lembaga">
+                        <option value="">Pilih Lembaga</option>
+                        @foreach(config('custom.lembaga') as $id => $nama)
+                            <option value="{{ $id }}">{{ $nama }}</option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="lembaga_id" />
+                </flux:field>
+
+                <flux:field>
                     <flux:label>Nama Kas</flux:label>
                     <flux:input wire:model="nama" placeholder="Masukkan nama kas" />
                     <flux:error name="nama" />
@@ -34,6 +45,7 @@
                     <flux:checkbox wire:model="ada_tagihan" label="Ada Tagihan?" description="Kas ini memiliki integrasi tagihan" />
                     <flux:checkbox wire:model="tabungan" label="Tabungan?" description="Kas ini digunakan untuk tabungan siswa" />
                     <flux:checkbox wire:model="penjualan" label="Penjualan?" description="Kas ini digunakan untuk modul penjualan" />
+                    <flux:checkbox wire:model="setoran" label="Setoran?" description="Kas ini untuk disetorkan" />
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">

@@ -10,15 +10,33 @@ class Kas extends Model
 {
     use CatatAktivitas;
     use HasUuids;
+
     protected $table = 'kas';
+
+    protected $fillable = [
+        'nama',
+        'lembaga_id',
+        'keterangan',
+        'saldo',
+        'ada_tagihan',
+        'tabungan',
+        'penjualan',
+        'setoran',
+        'jenis_transaksi',
+        'aturan_tagihan',
+    ];
+
     public $timestamps = false;
+
     protected $casts = [
         'jenis_transaksi' => 'array',
         'ada_tagihan' => 'boolean',
         'tabungan' => 'boolean',
         'penjualan' => 'boolean',
+        'setoran' => 'boolean',
         'aturan_tagihan' => 'array',
     ];
+
     public function scopeGetDaftarKas($query, $lembaga_id = null)
     {
         $lembaga_id == null ? auth()->user()->authable->lembaga_id : $lembaga_id;
@@ -28,6 +46,7 @@ class Kas extends Model
             })
             ->select('id', 'nama', 'lembaga_id', 'jenis_transaksi');
     }
+
     public function scopeGetDaftarTagihan($query, $lembaga_id = null)
     {
         $lembaga_id == null ? auth()->user()->authable->lembaga_id : $lembaga_id;
@@ -38,6 +57,7 @@ class Kas extends Model
             ->where('ada_tagihan', true)
             ->select('id', 'nama', 'lembaga_id', 'jenis_transaksi');
     }
+
     public function scopeGetDaftarTabungan($query, $lembaga_id = null)
     {
         $lembaga_id == null ? auth()->user()->authable->lembaga_id : $lembaga_id;

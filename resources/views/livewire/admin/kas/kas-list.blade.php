@@ -35,6 +35,7 @@
                     <flux:table.column>Ada Tagihan</flux:table.column>
                     <flux:table.column>Tabungan</flux:table.column>
                     <flux:table.column>Penjualan</flux:table.column>
+                    <flux:table.column>Setoran</flux:table.column>
                     <flux:table.column>Aksi</flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -66,13 +67,26 @@
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
+                                @if($kas->setoran)
+                                    <flux:badge color="green">Ya</flux:badge>
+                                @else
+                                    <flux:badge color="gray">Tidak</flux:badge>
+                                @endif
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                @if($kas->setoran)
+                                    {{-- button setor dana --}}
+                                    <flux:button size="sm" wire:click="setorDana('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menyetor dana ini? Saldo kas akan di-reset menjadi 0." icon="banknotes" color="green"></flux:button>
+                                @endif
+                                {{-- button edit kas --}}
                                 <flux:button size="sm" href="{{ route('admin.kas.edit', $kas->id) }}" wire:navigate icon="pencil" color="yellow"></flux:button>
+                                {{-- button delete kas --}}
                                 <flux:button size="sm" variant="danger" wire:click="delete('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus kas ini?" icon="trash"></flux:button>
                             </flux:table.cell>
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="6" class="text-center">Data tidak ditemukan.</flux:table.cell>
+                            <flux:table.cell colspan="9" class="text-center">Data tidak ditemukan.</flux:table.cell>
                         </flux:table.row>
                     @endforelse
                 </flux:table.rows>

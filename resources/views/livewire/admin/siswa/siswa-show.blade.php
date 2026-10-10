@@ -19,7 +19,7 @@
                         @if($siswa->foto)
                             <img src="{{ \Illuminate\Support\Facades\Storage::url($siswa->foto) }}" class="size-32 object-cover rounded-lg border border-gray-200 shadow-sm" alt="Foto Siswa">
                         @else
-                            <img src="{{ asset($siswa->jenis_kelamin === 'p' ? 'girl.jpg' : 'boy.jpg') }}" class="size-32 object-cover rounded-lg border border-gray-200 shadow-sm" alt="Foto Default">
+                            <img src="{{ asset($siswa->jenis_kelamin === 'p' ? 'images/girl.jpg' : 'images/boy.jpg') }}" class="size-32 object-cover rounded-lg border border-gray-200 shadow-sm" alt="Foto Default">
                         @endif
                     </div>
 

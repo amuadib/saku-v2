@@ -32,6 +32,7 @@ use App\Livewire\Admin\Transaksi\TransaksiList;
 use App\Livewire\Admin\User\UserForm;
 use App\Livewire\Admin\User\UserList;
 use App\Livewire\Siswa\Informasi;
+use App\Livewire\Siswa\KartuSiswa;
 use App\Livewire\Siswa\Profil;
 use App\Models\Siswa;
 use App\Models\User;
@@ -61,6 +62,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard-siswa', App\Livewire\Siswa\Dashboard::class)->name('siswa.dashboard');
     Route::get('/informasi', Informasi::class)->name('siswa.informasi');
     Route::get('/profil', Profil::class)->name('siswa.profil');
+    Route::get('/riwayat-tabungan', App\Livewire\Siswa\TabunganRiwayat::class)->name('siswa.tabungan.riwayat');
+    Route::get('/saldo-tabungan', App\Livewire\Siswa\TabunganList::class)->name('siswa.tabungan.list');
+    Route::get('/tagihan', App\Livewire\Siswa\TagihanList::class)->name('siswa.tagihan');
+    Route::get('/transaksi', App\Livewire\Siswa\TransaksiList::class)->name('siswa.transaksi');
+    Route::get('/kartu-siswa', KartuSiswa::class)->name('siswa.kartu');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {

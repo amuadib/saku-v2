@@ -7,8 +7,12 @@
         
         <div class="relative z-10 flex justify-between items-start">
             <div class="flex items-center gap-4">
-                <div class="bg-white/10 backdrop-blur-md border border-white/20 p-2.5 rounded-2xl flex items-center justify-center aspect-square h-14 w-14 shadow-inner">
-                    <x-app-logo-icon class="size-8 object-contain drop-shadow-md text-white" />
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 {{ $siswa->foto ? 'p-0.5' : 'p-2.5' }} rounded-2xl flex items-center justify-center aspect-square h-14 w-14 shadow-inner overflow-hidden">
+                    @if($siswa->foto)
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($siswa->foto) }}" alt="{{ $siswa->nama }}" class="w-full h-full object-cover rounded-xl" />
+                    @else
+                        <x-app-logo-icon class="size-8 object-contain drop-shadow-md text-white" />
+                    @endif
                 </div>
                 <div>
                     <div class="text-xs text-emerald-100 font-medium tracking-widest uppercase mb-0.5">Selamat Datang Di</div>
@@ -43,10 +47,10 @@
             </div>
             
             <div class="relative z-10">
-                <button class="w-full bg-emerald-600 hover:bg-emerald-700 transition text-white text-sm font-semibold px-4 py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
+                <a href="{{ route('siswa.tabungan.riwayat') }}" wire:navigate class="w-full bg-emerald-600 hover:bg-emerald-700 transition text-white text-sm font-semibold px-4 py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
                     <flux:icon name="clock" class="size-5" variant="outline" />
                     Riwayat Setoran Tabungan
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -58,19 +62,19 @@
             Menu Layanan
         </h3>
         <div class="grid grid-cols-4 gap-x-4 gap-y-6">
-            <a href="#" class="flex flex-col items-center gap-2.5 group">
+            <a href="{{ route('siswa.tagihan') }}" wire:navigate class="flex flex-col items-center gap-2.5 group">
                 <div class="w-14 h-14 bg-white border border-gray-100 rounded-[20px] flex items-center justify-center text-emerald-600 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 group-hover:bg-emerald-50 transition-all duration-300">
                     <flux:icon name="document-text" class="size-6" variant="outline" />
                 </div>
                 <span class="text-[11px] text-gray-600 font-semibold group-hover:text-emerald-700 transition-colors">Tagihan</span>
             </a>
-            <a href="#" class="flex flex-col items-center gap-2.5 group">
+            <a href="{{ route('siswa.tabungan.list') }}" wire:navigate class="flex flex-col items-center gap-2.5 group">
                 <div class="w-14 h-14 bg-white border border-gray-100 rounded-[20px] flex items-center justify-center text-emerald-600 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 group-hover:bg-emerald-50 transition-all duration-300">
                     <flux:icon name="wallet" class="size-6" variant="outline" />
                 </div>
                 <span class="text-[11px] text-gray-600 font-semibold group-hover:text-emerald-700 transition-colors">Tabungan</span>
             </a>
-            <a href="#" class="flex flex-col items-center gap-2.5 group">
+            <a href="{{ route('siswa.transaksi') }}" wire:navigate class="flex flex-col items-center gap-2.5 group">
                 <div class="w-14 h-14 bg-white border border-gray-100 rounded-[20px] flex items-center justify-center text-emerald-600 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 group-hover:bg-emerald-50 transition-all duration-300">
                     <flux:icon name="arrows-right-left" class="size-6" variant="outline" />
                 </div>
@@ -82,7 +86,7 @@
                 </div>
                 <span class="text-[11px] text-gray-600 font-semibold group-hover:text-emerald-700 transition-colors">Absensi</span>
             </a>
-            <a href="#" class="flex flex-col items-center gap-2.5 group">
+            <a href="{{ route('siswa.kartu') }}" wire:navigate class="flex flex-col items-center gap-2.5 group">
                 <div class="w-14 h-14 bg-white border border-gray-100 rounded-[20px] flex items-center justify-center text-emerald-600 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 group-hover:bg-emerald-50 transition-all duration-300">
                     <flux:icon name="credit-card" class="size-6" variant="outline" />
                 </div>

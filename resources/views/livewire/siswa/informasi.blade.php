@@ -1,6 +1,11 @@
 <div class="bg-gray-50 min-h-screen pb-24">
     <div class="px-6 pt-10 pb-4 bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('siswa.dashboard') }}" wire:navigate class="p-2 -ml-2 rounded-full text-gray-500 hover:bg-gray-100 transition">
+                <flux:icon name="arrow-left" class="size-5" />
+            </a>
         <h2 class="font-bold text-xl text-gray-800">Info dan Berita</h2>
+        </div>
         
         <!-- Category Pills -->
         <div class="flex gap-2 mt-5 overflow-x-auto pb-2 scrollbar-hide" style="scrollbar-width: none;">

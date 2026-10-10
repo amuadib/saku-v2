@@ -23,13 +23,13 @@ class TabunganList extends Component
         $this->resetPage();
     }
 
-    public function delete($id)
-    {
-        $tabungan = Tabungan::findOrFail($id);
-        Gate::authorize('delete', $tabungan);
-        $tabungan->delete();
-        session()->flash('message', 'Tabungan berhasil dihapus.');
-    }
+    // public function delete($id)
+    // {
+    //     $tabungan = Tabungan::findOrFail($id);
+    //     Gate::authorize('delete', $tabungan);
+    //     $tabungan->delete();
+    //     session()->flash('message', 'Tabungan berhasil dihapus.');
+    // }
 
     public function render()
     {

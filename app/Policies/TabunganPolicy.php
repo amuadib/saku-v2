@@ -38,17 +38,17 @@ class TabunganPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Tabungan $tabungan): bool
+    public function update(): bool
     {
-        return $user->isTataUsaha();
+        return false;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Tabungan $tabungan): bool
+    public function delete(): bool
     {
-        return $user->isTataUsaha();
+        return false;
     }
 
     /**

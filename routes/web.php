@@ -24,6 +24,7 @@ use App\Livewire\Admin\Supplier\SupplierForm;
 use App\Livewire\Admin\Supplier\SupplierList;
 use App\Livewire\Admin\Tabungan\TabunganForm;
 use App\Livewire\Admin\Tabungan\TabunganList;
+use App\Livewire\Admin\Tabungan\TabunganRiwayat;
 use App\Livewire\Admin\Tagihan\TagihanForm;
 use App\Livewire\Admin\Tagihan\TagihanList;
 use App\Livewire\Admin\Transaksi\TransaksiForm;
@@ -130,6 +131,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/tabungan', TabunganList::class)->name('tabungan.index');
     Route::get('/tabungan/create', TabunganForm::class)->name('tabungan.create');
     Route::get('/tabungan/{tabungan}/edit', TabunganForm::class)->name('tabungan.edit');
+    Route::get('/tabungan/{tabungan}/riwayat', TabunganRiwayat::class)->name('tabungan.riwayat');
 
     // Tagihan CRUD
     Route::get('/tagihan', TagihanList::class)->name('tagihan.index');

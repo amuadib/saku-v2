@@ -37,8 +37,9 @@
                             <flux:table.cell>{{ optional($tabungan->kas)->nama ?? '-' }}</flux:table.cell>
                             <flux:table.cell>{{ number_format($tabungan->saldo, 0, ',', '.') }}</flux:table.cell>
                             <flux:table.cell>
-                                <flux:button size="sm" href="{{ route('admin.tabungan.edit', $tabungan->id) }}" wire:navigate icon="pencil" color="yellow"></flux:button>
-                                <flux:button size="sm" variant="danger" wire:click="delete('{{ $tabungan->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus data tabungan ini?" icon="trash"></flux:button>
+                                {{-- <flux:button size="sm" href="{{ route('admin.tabungan.edit', $tabungan->id) }}" wire:navigate icon="pencil" color="yellow"></flux:button>
+                                <flux:button size="sm" variant="danger" wire:click="delete('{{ $tabungan->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus data tabungan ini?" icon="trash"></flux:button> --}}
+                                <flux:button size="sm" href="{{ route('admin.tabungan.riwayat', $tabungan->id) }}" wire:navigate icon="receipt-refund" color="zinc" title="Riwayat Tabungan"></flux:button>
                             </flux:table.cell>
                         </flux:table.row>
                     @empty

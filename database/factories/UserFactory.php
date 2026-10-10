@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Anggota;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -32,8 +33,8 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
-            'authable_type' => \App\Models\Anggota::class,
-            'authable_id' => (string) \Illuminate\Support\Str::uuid(),
+            'authable_type' => Anggota::class,
+            'authable_id' => (string) Str::uuid(),
         ];
     }
 

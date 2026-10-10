@@ -32,6 +32,7 @@ use App\Livewire\Admin\User\UserForm;
 use App\Livewire\Admin\User\UserList;
 use App\Livewire\Siswa\Informasi;
 use App\Livewire\Siswa\Profil;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -47,9 +48,16 @@ Route::get('/login/magic/{user}', function (User $user) {
 })->name('login.magic');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::redirect('/dashboard', '/admin')->name('dashboard');
+    Route::get('/dashboard', function () {
+        if (auth()->user()->authable_type === Siswa::class) {
+            return redirect()->route('siswa.dashboard');
+        }
+
+        return redirect()->route('admin.dashboard');
+    })->name('dashboard');
 
     // Route khusus Siswa
+    Route::get('/dashboard-siswa', App\Livewire\Siswa\Dashboard::class)->name('siswa.dashboard');
     Route::get('/informasi', Informasi::class)->name('siswa.informasi');
     Route::get('/profil', Profil::class)->name('siswa.profil');
 });

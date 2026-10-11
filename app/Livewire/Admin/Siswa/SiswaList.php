@@ -136,8 +136,8 @@ class SiswaList extends Component
         }
 
         $this->magicLinkSiswaName = $siswa->nama;
-        $relativeUrl = URL::temporarySignedRoute(
-            'login.magic', now()->addDays(30), ['user' => $user->id], false
+        $relativeUrl = URL::signedRoute(
+            'login.magic', ['user' => $user->id], false
         );
         $this->magicLinkUrl = request()->getSchemeAndHttpHost().$relativeUrl;
 

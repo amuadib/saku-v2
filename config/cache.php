@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE_V2', 'database'),
+    'default' => env('CACHE_STORE', env('CACHE_STORE_V2', 'database')),
 
     /*
     |--------------------------------------------------------------------------

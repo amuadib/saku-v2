@@ -9,9 +9,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("UPDATE `transaksi`
-                        SET `kode` = CONCAT(SUBSTR(`kode`,1,3),'1', SUBSTR(`kode`,4,12))
-                        WHERE LENGTH(`kode`) = 15");
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement("UPDATE `transaksi`
+                            SET `kode` = SUBSTR(`kode`,1,3) || '1' || SUBSTR(`kode`,4,12)
+                            WHERE LENGTH(`kode`) = 15");
+        } else {
+            DB::statement("UPDATE `transaksi`
+                            SET `kode` = CONCAT(SUBSTR(`kode`,1,3),'1', SUBSTR(`kode`,4,12))
+                            WHERE LENGTH(`kode`) = 15");
+        }
     }
 
     /**
@@ -19,8 +25,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('UPDATE `transaksi`
-                        SET `kode` = CONCAT(SUBSTR(`kode`,1,3), SUBSTR(`kode`,5,12))
-                        WHERE LENGTH(`kode`) = 16');
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('UPDATE `transaksi`
+                            SET `kode` = SUBSTR(`kode`,1,3) || SUBSTR(`kode`,5,12)
+                            WHERE LENGTH(`kode`) = 16');
+        } else {
+            DB::statement('UPDATE `transaksi`
+                            SET `kode` = CONCAT(SUBSTR(`kode`,1,3), SUBSTR(`kode`,5,12))
+                            WHERE LENGTH(`kode`) = 16');
+        }
     }
 };

@@ -17,7 +17,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION_V2', 'sqlite'),
+    'default' => env('DB_CONNECTION', env('DB_CONNECTION_V2', 'sqlite')),
 
     /*
     |--------------------------------------------------------------------------
@@ -49,9 +49,9 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE_V2', 'laravel'),
-            'username' => env('DB_USERNAME_V2', 'root'),
-            'password' => env('DB_PASSWORD_V2', ''),
+            'database' => env('DB_DATABASE', env('DB_DATABASE_V2', 'laravel')),
+            'username' => env('DB_USERNAME', env('DB_USERNAME_V2', 'root')),
+            'password' => env('DB_PASSWORD', env('DB_PASSWORD_V2', '')),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuidMorphs('authable');
         });
         Schema::table('users', function (Blueprint $table) {
+            $table->dropUnique(['email']);
             $table->dropColumn([
                 'name',
                 'email',

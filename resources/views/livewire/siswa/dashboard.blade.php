@@ -16,7 +16,7 @@
                 </div>
                 <div>
                     <div class="text-xs text-emerald-100 font-medium tracking-widest uppercase mb-0.5">Selamat Datang Di</div>
-                    <div class="font-bold text-lg leading-tight text-white drop-shadow-sm">{{ config('custom.lembaga.' . $siswa->lembaga_id, 'Sistem Akademik') }}</div>
+                    <div class="font-bold text-lg leading-tight text-white drop-shadow-sm">{{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama', 'Sistem Akademik') }}</div>
                     <div class="text-[13px] text-emerald-50 mt-1 font-medium opacity-90 flex items-center gap-1.5">{{ $siswa->nama }}</div>
                 </div>
             </div>

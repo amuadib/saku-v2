@@ -70,6 +70,7 @@
                     @endcan
                     
                     @if(auth()->user()->isAdmin())
+                        <flux:sidebar.item icon="cog" :href="route('admin.pengaturan.index')" :current="request()->routeIs('admin.pengaturan.*')" wire:navigate>{{ __('Pengaturan') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="clock" :href="route('admin.log-aktivitas.index')" :current="request()->routeIs('admin.log-aktivitas.*')" wire:navigate>{{ __('Log Aktivitas') }}</flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>

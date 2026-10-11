@@ -14,8 +14,8 @@
                 <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari nama kas..." icon="magnifying-glass" class="w-full sm:w-1/3" />
                 <flux:select wire:model.live="filter_lembaga" placeholder="Semua Lembaga" class="w-full sm:w-1/4">
                     <flux:select.option value="">Semua Lembaga</flux:select.option>
-                    @foreach(config('custom.lembaga') as $id => $nama)
-                        <flux:select.option value="{{ $id }}">{{ $nama }}</flux:select.option>
+                    @foreach(config('custom.lembaga') as $id => $val)
+                        <flux:select.option value="{{ $id }}">{{ $val['nama'] ?? $val }}</flux:select.option>
                     @endforeach
                 </flux:select>
             </div>
@@ -42,7 +42,7 @@
                     @forelse ($kas_items as $kas)
                         <flux:table.row>
                             <flux:table.cell>{{ $kas->nama }}</flux:table.cell>
-                            <flux:table.cell>{{ config('custom.lembaga.'.$kas->lembaga_id) }}</flux:table.cell>
+                            <flux:table.cell>{{ config('custom.lembaga.'.$kas->lembaga_id.'.nama') }}</flux:table.cell>
                             <flux:table.cell>{{ Str::limit($kas->keterangan, 50) }}</flux:table.cell>
                             <flux:table.cell>Rp {{ number_format($kas->saldo, 0, ',', '.') }}</flux:table.cell>
                             <flux:table.cell>

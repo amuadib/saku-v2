@@ -20,7 +20,7 @@
                 <flux:select wire:model.live="filter_lembaga" class="w-full sm:w-1/4">
                     <flux:select.option value="">Semua Lembaga</flux:select.option>
                     @foreach(config('custom.lembaga') as $key => $val)
-                        <flux:select.option value="{{ $key }}">{{ $val }}</flux:select.option>
+                        <flux:select.option value="{{ $key }}">{{ $val['nama'] ?? $val }}</flux:select.option>
                     @endforeach
                 </flux:select>
             </div>
@@ -43,7 +43,7 @@
                     @forelse ($kelas_items as $kelas)
                         <flux:table.row>
                             <flux:table.cell>{{ $kelas->nama }}</flux:table.cell>
-                            <flux:table.cell>{{ config('custom.lembaga.'.$kelas->lembaga_id) }}</flux:table.cell>
+                            <flux:table.cell>{{ config('custom.lembaga.'.$kelas->lembaga_id.'.nama') }}</flux:table.cell>
                             <flux:table.cell>{{ $kelas->tingkat ?? '-' }}</flux:table.cell>
                             <flux:table.cell>{{ $kelas->periode->nama ?? '-' }}</flux:table.cell>
                             <flux:table.cell>

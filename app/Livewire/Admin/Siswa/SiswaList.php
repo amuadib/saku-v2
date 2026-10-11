@@ -189,8 +189,8 @@ class SiswaList extends Component
                 'message' => WhatsappService::prosesPesan(
                     siswa: $s,
                     data: [
-                        'lembaga' => config('custom.lembaga.'.$s->lembaga_id),
-                        'kontak.nama' => config('custom.kontak_lembaga.'.$s->lembaga_id.'.kontak'),
+                        'lembaga' => config('custom.lembaga.'.$s->lembaga_id.'.nama'),
+                        'kontak.nama' => config('custom.lembaga.'.$s->lembaga_id.'.kontak'),
                         'tagihan.rincian' => $rincian,
                         'tagihan.total' => 'Rp '.number_format($total, thousands_separator: '.'),
                     ],
@@ -399,7 +399,7 @@ class SiswaList extends Component
                     $row[] = $siswa->nama_ibu;
                 }
                 if ($this->export_fields['lembaga']) {
-                    $row[] = config('custom.lembaga.'.$siswa->lembaga_id);
+                    $row[] = config('custom.lembaga.'.$siswa->lembaga_id.'.nama');
                 }
                 if ($this->export_fields['kelas']) {
                     $row[] = $siswa->kelas ? $siswa->kelas->nama : '';

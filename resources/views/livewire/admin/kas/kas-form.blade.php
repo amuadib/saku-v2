@@ -16,8 +16,8 @@
                     <flux:label>Lembaga</flux:label>
                     <flux:select wire:model="lembaga_id" placeholder="Pilih Lembaga">
                         <option value="">Pilih Lembaga</option>
-                        @foreach(config('custom.lembaga') as $id => $nama)
-                            <option value="{{ $id }}">{{ $nama }}</option>
+                        @foreach(config('custom.lembaga') as $id => $val)
+                            <option value="{{ $id }}">{{ $val['nama'] ?? $val }}</option>
                         @endforeach
                     </flux:select>
                     <flux:error name="lembaga_id" />

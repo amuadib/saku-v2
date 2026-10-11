@@ -37,7 +37,7 @@ class WhatsappService
         $awal = WhatsappService::prosesTemplate(
             [
                 'siswa.nama' => $siswa->nama,
-                'lembaga' => config('custom.lembaga.'.$siswa->lembaga_id),
+                'lembaga' => config('custom.lembaga.'.$siswa->lembaga_id.'.nama'),
             ],
             $siswa->status == 3 ? $template['awal_alumni'] : $template['awal']
         );
@@ -78,9 +78,9 @@ class WhatsappService
 
         $akhir = WhatsappService::prosesTemplate(
             [
-                'kontak.nama' => config('custom.kontak_lembaga.'.$siswa->lembaga_id.'.kontak'),
-                'kontak.telp' => config('custom.kontak_lembaga.'.$siswa->lembaga_id.'.telp'),
-                'lembaga' => config('custom.lembaga.'.$siswa->lembaga_id),
+                'kontak.nama' => config('custom.lembaga.'.$siswa->lembaga_id.'.kontak'),
+                'kontak.telp' => config('custom.lembaga.'.$siswa->lembaga_id.'.telp'),
+                'lembaga' => config('custom.lembaga.'.$siswa->lembaga_id.'.nama'),
             ],
             $t3
         );

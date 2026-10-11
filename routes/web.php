@@ -17,6 +17,7 @@ use App\Livewire\Admin\Penjualan\PenjualanForm;
 use App\Livewire\Admin\Penjualan\PenjualanList;
 use App\Livewire\Admin\Periode\PeriodeForm;
 use App\Livewire\Admin\Periode\PeriodeList;
+use App\Livewire\Admin\Setting\SettingForm;
 use App\Livewire\Admin\Siswa\SiswaForm;
 use App\Livewire\Admin\Siswa\SiswaList;
 use App\Livewire\Admin\Siswa\SiswaShow;
@@ -162,6 +163,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // Transaksi (Buku Besar) - Read Only List for now
     Route::get('/transaksi', TransaksiList::class)->name('transaksi.index');
     Route::get('/transaksi/create', TransaksiForm::class)->name('transaksi.create');
+
+    // Pengaturan
+    Route::get('/pengaturan', SettingForm::class)->name('pengaturan.index');
 
     // Log Aktivitas
     Route::get('/log-aktivitas', LogAktivitasList::class)->name('log-aktivitas.index');

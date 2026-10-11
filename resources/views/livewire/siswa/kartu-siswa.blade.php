@@ -23,7 +23,7 @@
                      <x-app-logo-icon class="size-full object-contain text-emerald-600" />
                 </div>
                 <div class="font-black text-emerald-600 text-xl uppercase tracking-tighter leading-tight flex-1">
-                    {{ config('custom.lembaga.' . $siswa->lembaga_id, 'SCHOOL NAME') }}
+                    {{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama', 'SCHOOL NAME') }}
                 </div>
             </div>
 

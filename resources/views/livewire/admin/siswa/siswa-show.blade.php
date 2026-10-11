@@ -92,7 +92,7 @@
                         </div>
                         <div>
                             <flux:text class="text-sm text-gray-500">Kelas</flux:text>
-                            <flux:text class="font-medium">{{ $siswa->kelas->nama ?? '-' }} {{ config('custom.lembaga.'.$siswa->lembaga_id) }}</flux:text>
+                            <flux:text class="font-medium">{{ $siswa->kelas->nama ?? '-' }} {{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama') }}</flux:text>
                         </div>
                         <div>
                             <flux:text class="text-sm text-gray-500">Status</flux:text>

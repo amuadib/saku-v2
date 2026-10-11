@@ -66,10 +66,10 @@
         <!-- ================= THERMAL LAYOUT ================= -->
         <div class="thermal-print p-2 bg-white shadow print:shadow-none print:p-0">
             <div class="text-center font-bold text-sm mb-1 uppercase">
-                {{ config('custom.lembaga.'.$siswa->lembaga_id, 'Lembaga') }}
+                {{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama', 'Lembaga') }}
             </div>
             <div class="text-center text-xs mb-2">
-                 {{ config('custom.kontak_lembaga.'.$siswa->lembaga_id.'.alamat', 'Alamat') }}
+                 {{ config('custom.lembaga.'.$siswa->lembaga_id.'.alamat', 'Alamat') }}
             </div>
             <div class="dashed-line"></div>
             <div class="text-center text-xs mb-2 font-bold underline">
@@ -134,8 +134,9 @@
         <div class="standard-print shadow-lg print:shadow-none bg-white">
             <!-- Header (Kop Surat) -->
             @php
-                $kop_path = public_path('kop_lembaga_'.$siswa->lembaga_id.'.jpg');
-                $kop_url = asset('kop_lembaga_'.$siswa->lembaga_id.'.jpg');
+                $kop_config = config('custom.lembaga.'.$siswa->lembaga_id.'.kop');
+                $kop_url = $kop_config ? asset($kop_config) : asset('kop_lembaga_'.$siswa->lembaga_id.'.jpg');
+                $kop_path = $kop_config ? public_path(ltrim($kop_config, '/')) : public_path('kop_lembaga_'.$siswa->lembaga_id.'.jpg');
             @endphp
             
             @if(file_exists($kop_path))
@@ -145,7 +146,7 @@
             @else
                 <div class="mb-6 border-b-4 border-black pb-4">
                     <div class="text-center">
-                        <h1 class="text-2xl font-bold uppercase">{{ config('custom.lembaga.'.$siswa->lembaga_id, 'Lembaga') }}</h1>
+                        <h1 class="text-2xl font-bold uppercase">{{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama', 'Lembaga') }}</h1>
                         <p class="text-sm">Sistem Administrasi Keuangan Terpadu</p>
                     </div>
                 </div>
@@ -221,7 +222,7 @@
             <!-- Signatures -->
             <div class="flex justify-end mt-12 text-sm">
                 <div class="text-center w-64">
-                    <p class="mb-20">{{ config('custom.lembaga.'.$siswa->lembaga_id) ?? 'Blitar' }}, {{ date('d F Y') }}<br>Petugas Administrasi,</p>
+                    <p class="mb-20">{{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama') ?? 'Blitar' }}, {{ date('d F Y') }}<br>Petugas Administrasi,</p>
                     <p class="font-bold underline">{{ auth()->user()->name ?? '.......................' }}</p>
                 </div>
             </div>

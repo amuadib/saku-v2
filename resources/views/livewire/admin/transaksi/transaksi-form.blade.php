@@ -34,8 +34,8 @@
                         <flux:field>
                             <flux:label>Lembaga</flux:label>
                             <flux:radio.group wire:model.live="lembaga_id">
-                                @foreach($lembagas as $id => $nama)
-                                    <flux:radio value="{{ $id }}" label="{{ $nama }}" />
+                                @foreach($lembagas as $id => $val)
+                                    <flux:radio value="{{ $id }}" label="{{ $val['nama'] ?? $val }}" />
                                 @endforeach
                             </flux:radio.group>
                         </flux:field>

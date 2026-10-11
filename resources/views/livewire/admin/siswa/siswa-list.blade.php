@@ -38,7 +38,7 @@
                             <flux:select wire:model.live="filter_lembaga" placeholder="Semua Lembaga">
                                 <option value="">Semua Lembaga</option>
                                 @foreach(config('custom.lembaga') as $key => $val)
-                                    <option value="{{ $key }}">{{ $val }}</option>
+                                    <option value="{{ $key }}">{{ $val['nama'] ?? $val }}</option>
                                 @endforeach
                             </flux:select>
                         </div>
@@ -79,7 +79,7 @@
                     
                     @if($filter_lembaga)
                         <button wire:click="$set('filter_lembaga', '')" class="inline-flex items-center gap-1.5 py-1 px-2.5 text-xs font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 rounded-md cursor-pointer hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors focus:outline-none">
-                            Lembaga: {{ config('custom.lembaga.'.$filter_lembaga) ?? 'Lembaga terpilih' }}
+                            Lembaga: {{ config('custom.lembaga.'.$filter_lembaga.'.nama') ?? 'Lembaga terpilih' }}
                             <flux:icon name="x-mark" class="size-3" />
                         </button>
                     @endif

@@ -7,16 +7,16 @@
         
         <div class="relative z-10 flex justify-between items-start">
             <div class="flex items-center gap-4">
-                <div class="bg-white/10 backdrop-blur-md border border-white/20 {{ $siswa->foto ? 'p-0.5' : 'p-2.5' }} rounded-2xl flex items-center justify-center aspect-square h-14 w-14 shadow-inner overflow-hidden">
-                    @if($siswa->foto)
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($siswa->foto) }}" alt="{{ $siswa->nama }}" class="w-full h-full object-cover rounded-xl" />
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 {{ $logoUrl ? 'p-1' : 'p-2.5' }} rounded-2xl flex items-center justify-center aspect-square h-14 w-14 shadow-inner overflow-hidden">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $lembaga['nama'] ?? $siswa->nama }}" class="w-full h-full object-contain rounded-xl" />
                     @else
                         <x-app-logo-icon class="size-8 object-contain drop-shadow-md text-white" />
                     @endif
                 </div>
                 <div>
                     <div class="text-xs text-emerald-100 font-medium tracking-widest uppercase mb-0.5">Selamat Datang Di</div>
-                    <div class="font-bold text-lg leading-tight text-white drop-shadow-sm">{{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama', 'Sistem Akademik') }}</div>
+                    <div class="font-bold text-lg leading-tight text-white drop-shadow-sm">{{ $lembaga['nama'] ?? 'Sistem Akademik' }}</div>
                     <div class="text-[13px] text-emerald-50 mt-1 font-medium opacity-90 flex items-center gap-1.5">{{ $siswa->nama }}</div>
                 </div>
             </div>

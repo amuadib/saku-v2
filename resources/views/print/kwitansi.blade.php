@@ -67,10 +67,7 @@
                     ->first();
                 $qrCodeSvg = null;
                 if ($userSiswa) {
-                    $relativeUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-                        'login.magic', now()->addDays(30), ['user' => $userSiswa->id], false
-                    );
-                    $magicLinkUrl = request()->getSchemeAndHttpHost() . $relativeUrl;
+                    $magicLinkUrl = $userSiswa->getMagicLoginUrl();
                     $renderer = new \BaconQrCode\Renderer\ImageRenderer(
                         new \BaconQrCode\Renderer\RendererStyle\RendererStyle(150),
                         new \BaconQrCode\Renderer\Image\SvgImageBackEnd()

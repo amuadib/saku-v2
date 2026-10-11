@@ -109,4 +109,27 @@ class User extends Authenticatable
     {
         return $this->role_id === 1;
     }
+
+    public function getMagicToken(): string
+    {
+        return substr(hash_hmac('sha256', "magic-login:{$this->id}:{$this->username}", config('app.key')), 0, 16);
+    }
+
+    public function isValidMagicToken(string $token): bool
+    {
+        return hash_equals($this->getMagicToken(), $token);
+    }
+
+    public function getMagicLoginUrl(?string $baseUrl = null): string
+    {
+        $identifier = $this->username ?: $this->id;
+        $path = route('login.magic', [
+            'identifier' => $identifier,
+            'token' => $this->getMagicToken(),
+        ], false);
+
+        $host = $baseUrl ?: (request()->hasHeader('host') ? request()->getSchemeAndHttpHost() : config('app.url'));
+
+        return rtrim($host, '/').$path;
+    }
 }

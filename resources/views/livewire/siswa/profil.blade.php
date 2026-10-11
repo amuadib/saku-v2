@@ -11,7 +11,7 @@
                     @if($siswa->foto)
                         <img src="{{ \Illuminate\Support\Facades\Storage::url($siswa->foto) }}" class="w-full h-full object-cover" alt="Foto Siswa">
                     @else
-                        <img src="{{ asset($siswa->jenis_kelamin === 'p' ? 'girl.jpg' : 'boy.jpg') }}" class="w-full h-full object-cover" alt="Foto Default">
+                        <img src="{{ asset($siswa->jenis_kelamin === 'p' ? 'images/girl.jpg' : 'images/boy.jpg') }}" class="w-full h-full object-cover" alt="Foto Default">
                     @endif
                 </div>
                 <div class="overflow-hidden">

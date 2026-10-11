@@ -87,4 +87,42 @@ class Siswa extends Model
     {
         return $this->hasMany(Keranjang::class);
     }
+
+    public function getLembagaAttribute(): array
+    {
+        return config('custom.lembaga.'.$this->lembaga_id, []);
+    }
+
+    public function getLembagaLogoUrlAttribute(): ?string
+    {
+        $lembaga = $this->lembaga;
+        $rawLogo = $lembaga['logo_url'] ?? ($lembaga['logo'] ?? null);
+
+        if (empty($rawLogo)) {
+            return null;
+        }
+
+        if (str_starts_with($rawLogo, 'http://') || str_starts_with($rawLogo, 'https://')) {
+            return $rawLogo;
+        }
+
+        $cleanPath = ltrim($rawLogo, '/');
+
+        if (file_exists(public_path($cleanPath))) {
+            return asset($cleanPath);
+        }
+
+        if (file_exists(public_path('storage/'.$cleanPath))) {
+            return asset('storage/'.$cleanPath);
+        }
+
+        $apiBase = config('custom.api_akademik.url');
+        if ($apiBase) {
+            $path = str_starts_with($cleanPath, 'storage/') ? $cleanPath : 'storage/'.$cleanPath;
+
+            return rtrim($apiBase, '/').'/'.$path;
+        }
+
+        return asset($rawLogo);
+    }
 }

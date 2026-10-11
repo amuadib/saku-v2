@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -136,10 +135,7 @@ class SiswaList extends Component
         }
 
         $this->magicLinkSiswaName = $siswa->nama;
-        $relativeUrl = URL::signedRoute(
-            'login.magic', ['user' => $user->id], false
-        );
-        $this->magicLinkUrl = request()->getSchemeAndHttpHost().$relativeUrl;
+        $this->magicLinkUrl = $user->getMagicLoginUrl();
 
         $this->showMagicLinkModal = true;
     }

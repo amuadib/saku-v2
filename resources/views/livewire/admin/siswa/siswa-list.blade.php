@@ -327,7 +327,7 @@
                     </flux:button>
                 </div>
                 <div class="text-xs text-gray-500 text-center mt-2">
-                    Link ini berlaku selama 30 hari. Siapapun yang memiliki link atau QR code ini dapat masuk ke akun siswa tanpa password.
+                    Siapapun yang memiliki link atau QR code ini dapat masuk ke akun siswa tanpa password.
                 </div>
             @endif
         </div>

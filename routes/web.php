@@ -41,14 +41,38 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::get('/login/magic/{user}', function (User $user) {
-    if (! request()->hasValidSignature(false)) {
-        abort(401, 'Link tidak valid atau sudah kadaluarsa.');
+// Short & compact magic login URL: /m/{identifier}/{token}
+Route::get('/m/{identifier}/{token}', function (string $identifier, string $token) {
+    $user = User::where('username', $identifier)
+        ->orWhere('id', $identifier)
+        ->first();
+
+    if (! $user || ! $user->isValidMagicToken($token)) {
+        abort(401, 'Link tidak valid.');
     }
+
     auth()->login($user);
 
     return redirect('/dashboard');
 })->name('login.magic');
+
+// Backward compatibility for existing /login/magic/{user} links
+Route::get('/login/magic/{user}', function (User $user) {
+    $token = request()->query('token') ?? request()->query('s');
+    if ($token && $user->isValidMagicToken($token)) {
+        auth()->login($user);
+
+        return redirect('/dashboard');
+    }
+
+    if (request()->hasValidSignature(false) || request()->hasValidSignature(true)) {
+        auth()->login($user);
+
+        return redirect('/dashboard');
+    }
+
+    abort(401, 'Link tidak valid.');
+})->name('login.magic.legacy');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {

@@ -112,7 +112,7 @@ class User extends Authenticatable
 
     public function getMagicToken(): string
     {
-        return substr(hash_hmac('sha256', "magic-login:{$this->id}:{$this->username}", config('app.key')), 0, 16);
+        return substr(hash_hmac('sha256', "magic-login:{$this->id}:{$this->username}", config('custom.api_akademik.token')), 0, 16);
     }
 
     public function isValidMagicToken(string $token): bool

@@ -27,23 +27,23 @@
     <div class="px-5 pt-5 space-y-4">
         @forelse($informasi_items as $item)
             <div wire:key="info-card-{{ $item->id }}" wire:click="selectInformasi('{{ $item->id }}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md hover:border-emerald-200 transition-all duration-200 active:scale-[0.99] group">
-                <div class="flex h-32">
+                <div class="flex items-stretch min-h-[145px]">
                     <!-- Thumbnail -->
-                    <div class="w-1/3 min-w-[110px] h-full bg-emerald-50/50 relative overflow-hidden flex items-center justify-center shrink-0">
+                    <div class="w-[105px] sm:w-[125px] self-stretch bg-emerald-50/50 relative overflow-hidden flex items-center justify-center shrink-0">
                         @if($item->gambar_url)
-                            <img src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <img src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         @else
-                            <div class="w-full h-full bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-600/20 flex flex-col items-center justify-center text-emerald-600 p-2 text-center">
+                            <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-600/20 flex flex-col items-center justify-center text-emerald-600 p-2 text-center">
                                 <flux:icon name="newspaper" class="size-7 mb-1 opacity-70" />
-                                <span class="text-[10px] font-bold uppercase tracking-wider">{{ $item->kategori }}</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider line-clamp-1">{{ $item->kategori }}</span>
                             </div>
                         @endif
                     </div>
 
                     <!-- Content snippet -->
-                    <div class="w-2/3 p-3.5 flex flex-col justify-between">
+                    <div class="flex-1 p-3.5 flex flex-col justify-between min-w-0">
                         <div>
-                            <div class="flex items-center justify-between gap-1 mb-1.5">
+                            <div class="flex items-center justify-between gap-1 mb-1.5 flex-wrap">
                                 <span class="text-[10px] font-semibold text-gray-400">
                                     {{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}
                                 </span>
@@ -67,7 +67,7 @@
                             </p>
                         </div>
 
-                        <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 pt-1">
+                        <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 pt-2 mt-auto">
                             Baca selengkapnya
                             <flux:icon name="arrow-right" class="size-3 group-hover:translate-x-0.5 transition-transform" />
                         </div>

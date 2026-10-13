@@ -36,6 +36,8 @@ class SettingForm extends Component
             $lembaga['tingkat_string'] = implode(', ', $lembaga['tingkat'] ?? []);
             $jamKerja = $lembaga['jam_kerja'] ?? [];
             $lembaga['jam_kerja_string'] = is_array($jamKerja) ? implode("\n", $jamKerja) : (string) $jamKerja;
+            $lembaga['kepala'] = $lembaga['kepala'] ?? '';
+            $lembaga['nip_kepala'] = $lembaga['nip_kepala'] ?? '';
         }
         $this->lembaga_items = $lembagaItems;
     }
@@ -115,6 +117,8 @@ class SettingForm extends Component
 
                 $logo = $item['logo_url'] ?? ($item['logo'] ?? ($currentLembaga[$id]['logo'] ?? null));
                 $kop = $item['kop_url'] ?? ($item['kop'] ?? ($currentLembaga[$id]['kop'] ?? null));
+                $ttd = $item['ttd_url'] ?? ($item['ttd'] ?? ($currentLembaga[$id]['ttd'] ?? null));
+                $stempel = $item['stempel_url'] ?? ($item['stempel'] ?? ($currentLembaga[$id]['stempel'] ?? null));
 
                 $syncedLembaga[$id] = [
                     'nama' => $item['nama'] ?? ($currentLembaga[$id]['nama'] ?? ''),
@@ -122,13 +126,19 @@ class SettingForm extends Component
                     'alias' => $alias,
                     'alamat' => $item['alamat'] ?? ($currentLembaga[$id]['alamat'] ?? ''),
                     'kontak' => $item['kontak'] ?? ($currentLembaga[$id]['kontak'] ?? ''),
+                    'kepala' => $item['kepala'] ?? ($currentLembaga[$id]['kepala'] ?? ''),
+                    'nip_kepala' => $item['nip_kepala'] ?? ($currentLembaga[$id]['nip_kepala'] ?? ''),
                     'telp' => $item['telp'] ?? ($currentLembaga[$id]['telp'] ?? ''),
                     'lat' => $item['lat'] ?? ($currentLembaga[$id]['lat'] ?? 0),
                     'lon' => $item['lon'] ?? ($currentLembaga[$id]['lon'] ?? 0),
                     'logo' => $logo,
                     'kop' => $kop,
+                    'ttd' => $ttd,
+                    'stempel' => $stempel,
                     'logo_url' => $item['logo_url'] ?? $logo,
                     'kop_url' => $item['kop_url'] ?? $kop,
+                    'ttd_url' => $item['ttd_url'] ?? $ttd,
+                    'stempel_url' => $item['stempel_url'] ?? $stempel,
                     'tingkat' => $tingkat,
                     'jam_kerja' => $jamKerja,
                 ];

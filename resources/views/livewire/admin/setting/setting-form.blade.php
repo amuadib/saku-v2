@@ -54,45 +54,47 @@
                             <flux:input wire:model="lembaga_items.{{ $id }}.telp" label="Telepon/WA" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.tingkat_string" label="Tingkat" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.kontak" label="Kontak Person" readonly disabled />
+                            <flux:input wire:model="lembaga_items.{{ $id }}.kepala" label="Nama Kepala Lembaga" readonly disabled />
+                            <flux:input wire:model="lembaga_items.{{ $id }}.nip_kepala" label="NIP / NIY Kepala" readonly disabled />
                             <flux:textarea wire:model="lembaga_items.{{ $id }}.jam_kerja_string" label="Jam Kerja" rows="3" class="sm:col-span-2" readonly disabled />
                             <flux:textarea wire:model="lembaga_items.{{ $id }}.alamat" label="Alamat Lengkap" rows="3" class="sm:col-span-2" readonly disabled />
 
-                            <!-- Logo & Kop Preview (Read-only) -->
-                            <div class="sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-gray-200/60 dark:border-white/10">
+                            <!-- Logo, Kop, TTD & Stempel Preview (Read-only) -->
+                            <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3 border-t border-gray-200/60 dark:border-white/10">
                                 @php
-                                    $rawLogo = $lembaga['logo_url'] ?? ($lembaga['logo'] ?? null);
-                                    $logoUrl = null;
-                                    if (!empty($rawLogo)) {
-                                        if (str_starts_with($rawLogo, 'http://') || str_starts_with($rawLogo, 'https://')) {
-                                            $logoUrl = $rawLogo;
-                                        } elseif (file_exists(public_path(ltrim($rawLogo, '/')))) {
-                                            $logoUrl = asset(ltrim($rawLogo, '/'));
-                                        } elseif (file_exists(public_path('storage/' . ltrim($rawLogo, '/')))) {
-                                            $logoUrl = asset('storage/' . ltrim($rawLogo, '/'));
-                                        } else {
-                                            $apiBase = config('custom.api_akademik.url');
-                                            $cleanPath = ltrim($rawLogo, '/');
-                                            $path = str_starts_with($cleanPath, 'storage/') ? $cleanPath : 'storage/' . $cleanPath;
-                                            $logoUrl = $apiBase ? rtrim($apiBase, '/') . '/' . $path : asset($rawLogo);
+                                    $resolveMediaUrl = function (?string $rawPath) {
+                                        if (empty($rawPath)) {
+                                            return null;
                                         }
-                                    }
+                                        if (str_starts_with($rawPath, 'http://') || str_starts_with($rawPath, 'https://')) {
+                                            return $rawPath;
+                                        }
+                                        $cleanPath = ltrim($rawPath, '/');
+                                        if (file_exists(public_path($cleanPath))) {
+                                            return asset($cleanPath);
+                                        }
+                                        if (file_exists(public_path('storage/' . $cleanPath))) {
+                                            return asset('storage/' . $cleanPath);
+                                        }
+                                        $apiBase = config('custom.api_akademik.url');
+                                        if ($apiBase) {
+                                            $path = str_starts_with($cleanPath, 'storage/') ? $cleanPath : 'storage/' . $cleanPath;
+                                            return rtrim($apiBase, '/') . '/' . $path;
+                                        }
+                                        return asset($rawPath);
+                                    };
+
+                                    $rawLogo = $lembaga['logo_url'] ?? ($lembaga['logo'] ?? null);
+                                    $logoUrl = $resolveMediaUrl($rawLogo);
 
                                     $rawKop = $lembaga['kop_url'] ?? ($lembaga['kop'] ?? null);
-                                    $kopUrl = null;
-                                    if (!empty($rawKop)) {
-                                        if (str_starts_with($rawKop, 'http://') || str_starts_with($rawKop, 'https://')) {
-                                            $kopUrl = $rawKop;
-                                        } elseif (file_exists(public_path(ltrim($rawKop, '/')))) {
-                                            $kopUrl = asset(ltrim($rawKop, '/'));
-                                        } elseif (file_exists(public_path('storage/' . ltrim($rawKop, '/')))) {
-                                            $kopUrl = asset('storage/' . ltrim($rawKop, '/'));
-                                        } else {
-                                            $apiBase = config('custom.api_akademik.url');
-                                            $cleanPath = ltrim($rawKop, '/');
-                                            $path = str_starts_with($cleanPath, 'storage/') ? $cleanPath : 'storage/' . $cleanPath;
-                                            $kopUrl = $apiBase ? rtrim($apiBase, '/') . '/' . $path : asset($rawKop);
-                                        }
-                                    }
+                                    $kopUrl = $resolveMediaUrl($rawKop);
+
+                                    $rawTtd = $lembaga['ttd_url'] ?? ($lembaga['ttd'] ?? null);
+                                    $ttdUrl = $resolveMediaUrl($rawTtd);
+
+                                    $rawStempel = $lembaga['stempel_url'] ?? ($lembaga['stempel'] ?? null);
+                                    $stempelUrl = $resolveMediaUrl($rawStempel);
                                 @endphp
 
                                 <!-- Logo -->
@@ -106,8 +108,8 @@
                                                 <flux:icon name="photo" class="size-6 text-gray-400 dark:text-zinc-500" />
                                             @endif
                                         </div>
-                                        <div class="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[200px]" title="{{ $rawLogo }}">
-                                            {{ $rawLogo ?? 'Belum ada logo' }}
+                                        <div class="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[140px]" title="{{ $rawLogo }}">
+                                            {{ $rawLogo ?? 'Belum ada' }}
                                         </div>
                                     </div>
                                 </div>
@@ -116,15 +118,51 @@
                                 <div class="space-y-1.5">
                                     <flux:label>Kop Surat</flux:label>
                                     <div class="flex items-center gap-3">
-                                        <div class="h-14 w-24 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                                        <div class="h-14 w-20 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                                             @if ($kopUrl)
                                                 <img src="{{ $kopUrl }}" alt="Kop" class="size-full object-contain p-1" />
                                             @else
                                                 <flux:icon name="document-text" class="size-6 text-gray-400 dark:text-zinc-500" />
                                             @endif
                                         </div>
-                                        <div class="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[200px]" title="{{ $rawKop }}">
-                                            {{ $rawKop ?? 'Belum ada kop' }}
+                                        <div class="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[140px]" title="{{ $rawKop }}">
+                                            {{ $rawKop ?? 'Belum ada' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TTD Kepala -->
+                                <div class="space-y-1.5">
+                                    <flux:label>TTD Kepala</flux:label>
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-14 w-16 rounded-lg border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm"
+                                             style="background: repeating-conic-gradient(rgba(128,128,128,0.12) 0% 25%, transparent 0% 50%) 50% / 10px 10px;">
+                                            @if ($ttdUrl)
+                                                <img src="{{ $ttdUrl }}" alt="TTD" class="size-full object-contain p-1" />
+                                            @else
+                                                <flux:icon name="pencil" class="size-6 text-gray-400 dark:text-zinc-500" />
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[140px]" title="{{ $rawTtd }}">
+                                            {{ $rawTtd ?? 'Belum ada' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Stempel Lembaga -->
+                                <div class="space-y-1.5">
+                                    <flux:label>Stempel Lembaga</flux:label>
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-14 rounded-lg border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm"
+                                             style="background: repeating-conic-gradient(rgba(128,128,128,0.12) 0% 25%, transparent 0% 50%) 50% / 10px 10px;">
+                                            @if ($stempelUrl)
+                                                <img src="{{ $stempelUrl }}" alt="Stempel" class="size-full object-contain p-1" />
+                                            @else
+                                                <flux:icon name="check-badge" class="size-6 text-gray-400 dark:text-zinc-500" />
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[140px]" title="{{ $rawStempel }}">
+                                            {{ $rawStempel ?? 'Belum ada' }}
                                         </div>
                                     </div>
                                 </div>

@@ -34,7 +34,9 @@
             <!-- Student ID Band -->
             <div class="bg-emerald-600 py-2.5 flex flex-col items-center justify-center z-10 relative shadow-sm">
                 <div class="text-amber-400 font-bold uppercase tracking-widest text-sm mb-0.5 text-center leading-none">KARTU IDENTITAS PELAJAR</div>
-                <div class="text-white font-bold tracking-widest text-[15px] leading-none">{{ $siswa->nis ?? $siswa->nisn ?? '-' }}</div>
+                <div class="text-white font-bold tracking-widest text-[15px] leading-none">
+                    {{ $siswa->nis }} {{ $siswa->nisn ? '/ ' . $siswa->nisn : '' }}
+                </div>
             </div>
 
             <!-- Middle Body -->
@@ -81,9 +83,30 @@
             </div>
 
             <!-- Bottom Footer (Orange) -->
-            <div class="relative bg-amber-500 h-[76px] w-full flex flex-col items-center justify-end pb-3 z-10">
-                <div class="w-32 border-t border-white/60 mb-1.5"></div>
-                <div class="text-white/90 text-[11px] font-medium tracking-wide">Kepala Sekolah</div>
+            <div class="relative bg-amber-500 min-h-[84px] w-full flex flex-col items-center justify-end pb-2.5 z-10 px-4">
+                <!-- TTD & Stempel Overlay -->
+                <div class="relative h-10 w-36 flex items-center justify-center">
+                    @if($siswa->lembaga_ttd_url)
+                        <div class="relative flex items-center justify-center">
+                            @if($siswa->lembaga_stempel_url)
+                                <img src="{{ $siswa->lembaga_stempel_url }}" class="absolute -left-7 size-10 object-contain opacity-85 pointer-events-none drop-shadow-sm" alt="Stempel Lembaga">
+                            @endif
+                            <img src="{{ $siswa->lembaga_ttd_url }}" class="h-10 w-auto max-w-[120px] object-contain relative z-10 drop-shadow-sm" alt="TTD Kepala">
+                        </div>
+                    @elseif($siswa->lembaga_stempel_url)
+                        <img src="{{ $siswa->lembaga_stempel_url }}" class="h-10 w-auto size-10 object-contain opacity-85 pointer-events-none drop-shadow-sm" alt="Stempel Lembaga">
+                    @endif
+                </div>
+
+                <div class="w-36 border-t border-white/70 mb-1"></div>
+                <div class="text-white font-bold text-[11px] tracking-wide text-center truncate max-w-[220px]">
+                    {{ $siswa->lembaga_kepala ?: 'Kepala Sekolah' }}
+                </div>
+                @if($siswa->lembaga_nip_kepala)
+                    <div class="text-white/80 text-[9px] font-normal tracking-wide text-center">
+                        NIP. {{ $siswa->lembaga_nip_kepala }}
+                    </div>
+                @endif
 
                 <!-- Small teal corner piece at bottom right -->
                 <div class="absolute bottom-0 right-0 w-24 h-2 bg-emerald-700"></div>

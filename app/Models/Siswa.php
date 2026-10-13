@@ -93,20 +93,17 @@ class Siswa extends Model
         return config('custom.lembaga.'.$this->lembaga_id, []);
     }
 
-    public function getLembagaLogoUrlAttribute(): ?string
+    public function resolveLembagaMediaUrl(?string $rawPath): ?string
     {
-        $lembaga = $this->lembaga;
-        $rawLogo = $lembaga['logo_url'] ?? ($lembaga['logo'] ?? null);
-
-        if (empty($rawLogo)) {
+        if (empty($rawPath)) {
             return null;
         }
 
-        if (str_starts_with($rawLogo, 'http://') || str_starts_with($rawLogo, 'https://')) {
-            return $rawLogo;
+        if (str_starts_with($rawPath, 'http://') || str_starts_with($rawPath, 'https://')) {
+            return $rawPath;
         }
 
-        $cleanPath = ltrim($rawLogo, '/');
+        $cleanPath = ltrim($rawPath, '/');
 
         if (file_exists(public_path($cleanPath))) {
             return asset($cleanPath);
@@ -123,6 +120,36 @@ class Siswa extends Model
             return rtrim($apiBase, '/').'/'.$path;
         }
 
-        return asset($rawLogo);
+        return asset($rawPath);
+    }
+
+    public function getLembagaLogoUrlAttribute(): ?string
+    {
+        return $this->resolveLembagaMediaUrl($this->lembaga['logo_url'] ?? ($this->lembaga['logo'] ?? null));
+    }
+
+    public function getLembagaKopUrlAttribute(): ?string
+    {
+        return $this->resolveLembagaMediaUrl($this->lembaga['kop_url'] ?? ($this->lembaga['kop'] ?? null));
+    }
+
+    public function getLembagaTtdUrlAttribute(): ?string
+    {
+        return $this->resolveLembagaMediaUrl($this->lembaga['ttd_url'] ?? ($this->lembaga['ttd'] ?? null));
+    }
+
+    public function getLembagaStempelUrlAttribute(): ?string
+    {
+        return $this->resolveLembagaMediaUrl($this->lembaga['stempel_url'] ?? ($this->lembaga['stempel'] ?? null));
+    }
+
+    public function getLembagaKepalaAttribute(): ?string
+    {
+        return $this->lembaga['kepala'] ?? null;
+    }
+
+    public function getLembagaNipKepalaAttribute(): ?string
+    {
+        return $this->lembaga['nip_kepala'] ?? null;
     }
 }

@@ -17,7 +17,7 @@
                 <div class="overflow-hidden flex-1 min-w-0">
                     <div class="font-bold text-[17px] text-gray-800 leading-tight truncate">{{ $siswa->nama ?? auth()->user()->username ?? 'Siswa' }}</div>
                     <div class="text-[12px] text-gray-500 mb-0.5 truncate">{{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama') }}</div>
-                    <div class="text-[12px] text-gray-500 truncate">{{ $siswa->nisn ?? '-' }}</div>
+                    <div class="text-[12px] text-gray-500 truncate">{{ $siswa->nis }} {{ $siswa->nisn ? '/ ' . $siswa->nisn : '' }}</div>
                 </div>
             </div>
 

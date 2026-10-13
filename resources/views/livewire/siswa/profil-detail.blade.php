@@ -92,13 +92,13 @@
                     <!-- NISN & NIS Pill -->
                     <div class="w-full bg-gray-50 rounded-2xl py-2.5 px-4 flex items-center justify-around border border-gray-100 text-xs text-gray-600">
                         <div class="text-center">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-medium">NISN</div>
-                            <div class="font-bold text-gray-800 mt-0.5">{{ $siswa->nisn ?: '-' }}</div>
+                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-medium">NIS</div>
+                            <div class="font-bold text-gray-800 mt-0.5">{{ $siswa->nis ?: '-' }}</div>
                         </div>
                         <div class="h-6 w-px bg-gray-200"></div>
                         <div class="text-center">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-medium">NIS</div>
-                            <div class="font-bold text-gray-800 mt-0.5">{{ $siswa->nis ?: '-' }}</div>
+                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-medium">NISN</div>
+                            <div class="font-bold text-gray-800 mt-0.5">{{ $siswa->nisn ?: '-' }}</div>
                         </div>
                     </div>
                 </div>

@@ -98,6 +98,9 @@
                         <flux:sidebar.item icon="truck" :href="route('admin.supplier.index')" :current="request()->routeIs('admin.supplier.*')" wire:navigate>{{ __('Supplier') }}</flux:sidebar.item>
                     @endcan
                     <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('admin.pengaduan.index')" :current="request()->routeIs('admin.pengaduan.*')" wire:navigate>{{ __('Pengaduan') }}</flux:sidebar.item>
+                    @can('viewAny', \App\Models\Informasi::class)
+                        <flux:sidebar.item icon="newspaper" :href="route('admin.informasi.index')" :current="request()->routeIs('admin.informasi.*')" wire:navigate>{{ __('Informasi') }}</flux:sidebar.item>
+                    @endcan
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

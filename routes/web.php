@@ -4,6 +4,8 @@ use App\Http\Controllers\PrintController;
 use App\Livewire\Admin\Barang\BarangForm;
 use App\Livewire\Admin\Barang\BarangList;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Informasi\InformasiForm as AdminInformasiForm;
+use App\Livewire\Admin\Informasi\InformasiList as AdminInformasiList;
 use App\Livewire\Admin\Kas\KasForm;
 use App\Livewire\Admin\Kas\KasList;
 use App\Livewire\Admin\Kelas\KelasForm;
@@ -180,6 +182,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/pengaduan', PengaduanList::class)->name('pengaduan.index');
     Route::get('/pengaduan/create', PengaduanForm::class)->name('pengaduan.create');
     Route::get('/pengaduan/{pengaduan}/edit', PengaduanForm::class)->name('pengaduan.edit');
+
+    // Informasi CRUD
+    Route::get('/informasi', AdminInformasiList::class)->name('informasi.index');
+    Route::get('/informasi/create', AdminInformasiForm::class)->name('informasi.create');
+    Route::get('/informasi/{informasi}/edit', AdminInformasiForm::class)->name('informasi.edit');
 
     // Penjualan CRUD
     Route::get('/penjualan', PenjualanList::class)->name('penjualan.index');

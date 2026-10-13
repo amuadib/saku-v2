@@ -119,40 +119,70 @@
             </a>
         </div>
         
-        <!-- Modern News Banner -->
-        <div class="bg-gray-900 rounded-[24px] p-6 text-white relative overflow-hidden mb-5 shadow-lg shadow-gray-900/10">
-            <div class="absolute right-0 top-0 w-40 h-40 bg-emerald-500 rounded-full blur-[60px] opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
-            <div class="absolute left-0 bottom-0 w-32 h-32 bg-emerald-600 rounded-full blur-[50px] opacity-20 -ml-10 -mb-10 pointer-events-none"></div>
-            <div class="relative z-10">
-                <div class="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3 border border-emerald-500/20 tracking-wide">INFORMASI</div>
-                <div class="font-bold text-[17px] mb-5 leading-snug text-white/95">Pembaruan Sistem Akademik & Pembayaran</div>
-                <button class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 w-full flex items-center justify-center gap-2">
-                    Baca Selengkapnya
-                    <flux:icon name="arrow-right" class="size-3.5" />
-                </button>
+        @if(isset($informasiSticky) && $informasiSticky)
+            <!-- Modern News Banner (Sticky / Garis Merah) -->
+            <a href="{{ route('siswa.informasi', ['id' => $informasiSticky->id]) }}" class="block bg-gray-900 rounded-[24px] p-6 text-white relative overflow-hidden mb-5 shadow-lg shadow-gray-900/10 group">
+                <div class="absolute right-0 top-0 w-40 h-40 bg-emerald-500 rounded-full blur-[60px] opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
+                <div class="absolute left-0 bottom-0 w-32 h-32 bg-emerald-600 rounded-full blur-[50px] opacity-20 -ml-10 -mb-10 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3 border border-emerald-500/20 tracking-wide uppercase">
+                        <flux:icon name="bookmark" class="size-2.5 text-emerald-400" />
+                        {{ $informasiSticky->kategori }}
+                    </div>
+                    <div class="font-bold text-[17px] mb-3 leading-snug text-white/95 group-hover:text-emerald-300 transition-colors">
+                        {{ $informasiSticky->judul }}
+                    </div>
+                    <p class="text-xs text-gray-300 line-clamp-2 mb-4 leading-relaxed">
+                        {{ strip_tags($informasiSticky->konten) }}
+                    </p>
+                    <div class="bg-emerald-500 group-hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 w-full flex items-center justify-center gap-2">
+                        Baca Selengkapnya
+                        <flux:icon name="arrow-right" class="size-3.5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                </div>
+            </a>
+        @else
+            <!-- Modern News Banner (Default Placeholder) -->
+            <div class="bg-gray-900 rounded-[24px] p-6 text-white relative overflow-hidden mb-5 shadow-lg shadow-gray-900/10">
+                <div class="absolute right-0 top-0 w-40 h-40 bg-emerald-500 rounded-full blur-[60px] opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
+                <div class="absolute left-0 bottom-0 w-32 h-32 bg-emerald-600 rounded-full blur-[50px] opacity-20 -ml-10 -mb-10 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <div class="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3 border border-emerald-500/20 tracking-wide">INFORMASI</div>
+                    <div class="font-bold text-[17px] mb-2 leading-snug text-white/95">Pusat Informasi & Pengumuman</div>
+                    <p class="text-xs text-gray-300 mb-5 leading-relaxed">Dapatkan kabar terbaru seputar kegiatan akademik dan pengumuman sekolah langsung di sini.</p>
+                    <a href="{{ route('siswa.informasi') }}" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 w-full flex items-center justify-center gap-2">
+                        Buka Halaman Informasi
+                        <flux:icon name="arrow-right" class="size-3.5" />
+                    </a>
+                </div>
             </div>
-        </div>
-        
-        <div class="space-y-4">
-            <!-- Elegant News Item 1 -->
-            <a href="#" class="block bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 hover:border-emerald-200 hover:shadow-md transition-all duration-300 group">
-                <div class="flex items-center gap-2 mb-2.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span class="text-[11px] text-gray-500 font-semibold tracking-wide">02-08-2026</span>
-                </div>
-                <div class="font-bold text-[15px] text-gray-800 mb-2 group-hover:text-emerald-700 transition-colors">Tagihan Bulan Juli 2026</div>
-                <div class="text-[13px] text-gray-500 leading-relaxed line-clamp-2">Assalamu'alaikum. Wr. Wb. Sugeng sonten Bapak/Ibu. Pangapunten wonten kesalahan input tagihan untuk SMAI Bulan Juli 2026, Seharusnya gratis saking Yayasan.</div>
-            </a>
-            
-            <!-- Elegant News Item 2 -->
-            <a href="#" class="block bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 hover:border-emerald-200 hover:shadow-md transition-all duration-300 group">
-                <div class="flex items-center gap-2 mb-2.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span class="text-[11px] text-gray-500 font-semibold tracking-wide">10-07-2026</span>
-                </div>
-                <div class="font-bold text-[15px] text-gray-800 mb-2 group-hover:text-emerald-700 transition-colors">Siap Berangkat Mondok !</div>
-                <div class="text-[13px] text-gray-500 leading-relaxed line-clamp-2">Pemberitahuan kepada seluruh santri untuk mempersiapkan segala perlengkapan sebelum keberangkatan.</div>
-            </a>
-        </div>
+        @endif
+
+        <!-- Berita Lainnya (Garis Biru) -->
+        @if(isset($informasiLainnya) && $informasiLainnya->isNotEmpty())
+            <div class="space-y-4">
+                @foreach($informasiLainnya as $item)
+                    <a href="{{ route('siswa.informasi', ['id' => $item->id]) }}" class="block bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 hover:border-emerald-200 hover:shadow-md transition-all duration-300 group">
+                        <div class="flex items-center justify-between mb-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span class="text-[11px] text-gray-500 font-semibold tracking-wide">
+                                    {{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}
+                                </span>
+                            </div>
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full capitalize">
+                                {{ $item->kategori }}
+                            </span>
+                        </div>
+                        <div class="font-bold text-[15px] text-gray-800 mb-1.5 group-hover:text-emerald-700 transition-colors line-clamp-1">
+                            {{ $item->judul }}
+                        </div>
+                        <div class="text-[13px] text-gray-500 leading-relaxed line-clamp-2">
+                            {{ strip_tags($item->konten) }}
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        @endif
     </div>
 </div>

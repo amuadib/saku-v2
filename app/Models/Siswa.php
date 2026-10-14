@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -200,5 +201,15 @@ class Siswa extends Model
         }
 
         return null;
+    }
+
+    public function chatMessages(): HasMany
+    {
+        return $this->hasMany(ChatMessage::class, 'siswa_id')->orderBy('created_at', 'asc');
+    }
+
+    public function latestChatMessage(): HasOne
+    {
+        return $this->hasOne(ChatMessage::class, 'siswa_id')->latestOfMany();
     }
 }

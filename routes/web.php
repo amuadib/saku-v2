@@ -3,6 +3,7 @@
 use App\Http\Controllers\PrintController;
 use App\Livewire\Admin\Barang\BarangForm;
 use App\Livewire\Admin\Barang\BarangList;
+use App\Livewire\Admin\Chat\ChatIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Informasi\InformasiForm as AdminInformasiForm;
 use App\Livewire\Admin\Informasi\InformasiList as AdminInformasiList;
@@ -34,6 +35,7 @@ use App\Livewire\Admin\Transaksi\TransaksiForm;
 use App\Livewire\Admin\Transaksi\TransaksiList;
 use App\Livewire\Admin\User\UserForm;
 use App\Livewire\Admin\User\UserList;
+use App\Livewire\Siswa\Chat;
 use App\Livewire\Siswa\Informasi;
 use App\Livewire\Siswa\KartuSiswa;
 use App\Livewire\Siswa\Profil;
@@ -96,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tagihan', App\Livewire\Siswa\TagihanList::class)->name('siswa.tagihan');
     Route::get('/transaksi', App\Livewire\Siswa\TransaksiList::class)->name('siswa.transaksi');
     Route::get('/kartu-siswa', KartuSiswa::class)->name('siswa.kartu');
+    Route::get('/chat', Chat::class)->name('siswa.chat');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
@@ -177,6 +180,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/pembelian', PembelianList::class)->name('pembelian.index');
     Route::get('/pembelian/create', PembelianForm::class)->name('pembelian.create');
     Route::get('/pembelian/{pembelian}/edit', PembelianForm::class)->name('pembelian.edit');
+
+    // Chat Siswa
+    Route::get('/chat', ChatIndex::class)->name('chat.index');
 
     // Pengaduan CRUD
     Route::get('/pengaduan', PengaduanList::class)->name('pengaduan.index');

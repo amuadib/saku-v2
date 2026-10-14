@@ -33,11 +33,11 @@
                 <span class="text-[10px] font-semibold {{ request()->routeIs('siswa.informasi') ? 'text-emerald-600' : 'text-gray-400' }}">Informasi</span>
             </a>
 
-            <a href="#" class="flex flex-col items-center gap-1 text-gray-400">
-                <div class="px-5 py-1 flex items-center justify-center">
-                    <flux:icon name="chat-bubble-oval-left-ellipsis" class="size-6" variant="outline" />
+            <a href="{{ route('siswa.chat') }}" wire:navigate class="flex flex-col items-center gap-1 {{ request()->routeIs('siswa.chat') ? 'text-emerald-600' : 'text-gray-400' }}">
+                <div class="{{ request()->routeIs('siswa.chat') ? 'bg-emerald-50 text-emerald-600 rounded-full px-5 py-1' : 'px-5 py-1 text-gray-400' }} flex items-center justify-center transition-colors">
+                    <flux:icon name="chat-bubble-oval-left-ellipsis" class="size-6" variant="{{ request()->routeIs('siswa.chat') ? 'solid' : 'outline' }}" />
                 </div>
-                <span class="text-[10px] font-semibold text-gray-400">Chat</span>
+                <span class="text-[10px] font-semibold {{ request()->routeIs('siswa.chat') ? 'text-emerald-600' : 'text-gray-400' }}">Chat</span>
             </a>
 
             <a href="{{ route('siswa.profil') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('siswa.profil') ? 'text-emerald-600' : 'text-gray-400' }}">

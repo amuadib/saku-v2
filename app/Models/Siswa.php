@@ -38,6 +38,11 @@ class Siswa extends Model
 
     ];
 
+    public function auth()
+    {
+        return $this->morphOne(User::class, 'authable');
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

@@ -67,6 +67,8 @@ class SiswaList extends Component
 
     public $magicLinkSiswaName = '';
 
+    public $magicLinkSiswaId = null;
+
     // Penjualan Modal Properties removed (extracted to SiswaPenjualanModal)
 
     public function mount()
@@ -134,10 +136,38 @@ class SiswaList extends Component
             return;
         }
 
+        $this->magicLinkSiswaId = $siswa->id;
         $this->magicLinkSiswaName = $siswa->nama;
         $this->magicLinkUrl = $user->getMagicLoginUrl();
 
         $this->showMagicLinkModal = true;
+    }
+
+    public function regenerateMagicLink()
+    {
+        if (! $this->magicLinkSiswaId) {
+            return;
+        }
+
+        $siswa = Siswa::find($this->magicLinkSiswaId);
+        if (! $siswa) {
+            return;
+        }
+
+        $user = User::where('authable_type', Siswa::class)
+            ->where('authable_id', $siswa->id)
+            ->first();
+
+        if (! $user) {
+            \Flux::toast('User tidak ditemukan.', variant: 'danger');
+
+            return;
+        }
+
+        $user->regenerateMagicToken();
+        $this->magicLinkUrl = $user->getMagicLoginUrl();
+
+        \Flux::toast('Magic link berhasil di-regenerate. Link lama otomatis tidak berlaku lagi.', variant: 'success');
     }
 
     // Penjualan Modal Methods removed (extracted to SiswaPenjualanModal)

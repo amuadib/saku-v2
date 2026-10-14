@@ -8,16 +8,16 @@
             
             <div class="flex items-center gap-4 relative z-10 flex-1 min-w-0">
                 <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 overflow-hidden shadow-sm flex-shrink-0">
-                    @if($siswa->foto)
+                    @if($siswa?->foto)
                         <img src="{{ \Illuminate\Support\Facades\Storage::url($siswa->foto) }}" class="w-full h-full object-cover" alt="Foto Siswa">
                     @else
-                        <img src="{{ asset($siswa->jenis_kelamin === 'p' ? 'images/girl.jpg' : 'images/boy.jpg') }}" class="w-full h-full object-cover" alt="Foto Default">
+                        <img src="{{ asset($siswa?->jenis_kelamin === 'p' ? 'images/girl.jpg' : 'images/boy.jpg') }}" class="w-full h-full object-cover" alt="Foto Default">
                     @endif
                 </div>
                 <div class="overflow-hidden flex-1 min-w-0">
-                    <div class="font-bold text-[17px] text-gray-800 leading-tight truncate">{{ $siswa->nama ?? auth()->user()->username ?? 'Siswa' }}</div>
-                    <div class="text-[12px] text-gray-500 mb-0.5 truncate">{{ config('custom.lembaga.'.$siswa->lembaga_id.'.nama') }}</div>
-                    <div class="text-[12px] text-gray-500 truncate">{{ $siswa->nis }} {{ $siswa->nisn ? '/ ' . $siswa->nisn : '' }}</div>
+                    <div class="font-bold text-[17px] text-gray-800 leading-tight truncate">{{ $siswa?->nama ?? auth()->user()->username ?? 'Siswa' }}</div>
+                    <div class="text-[12px] text-gray-500 mb-0.5 truncate">{{ config('custom.lembaga.'.($siswa?->lembaga_id ?? 1).'.nama') }}</div>
+                    <div class="text-[12px] text-gray-500 truncate">{{ $siswa?->nis }} {{ $siswa?->nisn ? '/ ' . $siswa->nisn : '' }}</div>
                 </div>
             </div>
 
@@ -40,6 +40,19 @@
                 </div>
                 <flux:icon name="chevron-right" class="size-4 text-gray-400 group-hover:text-emerald-600 transition" />
             </a>
+
+            <button type="button" wire:click="confirmRegenerate" class="w-full flex items-center justify-between px-2 py-4 border-b border-gray-100 hover:bg-emerald-50/50 transition rounded-xl group text-left">
+                <div class="flex items-center gap-4">
+                    <div class="text-gray-400 group-hover:text-emerald-600 transition">
+                        <flux:icon name="arrow-path" class="size-6" variant="outline" />
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-700 text-sm group-hover:text-emerald-700 transition">Buat ulang link Login</div>
+                        <div class="text-[11px] text-gray-400">Buat ulang link login dan masuk kembali</div>
+                    </div>
+                </div>
+                <flux:icon name="chevron-right" class="size-4 text-gray-400 group-hover:text-emerald-600 transition" />
+            </button>
             
             <a href="#" class="flex items-center gap-4 px-2 py-4 border-b border-gray-100 hover:bg-emerald-50/50 transition rounded-xl group">
                 <div class="text-gray-400 group-hover:text-emerald-600 transition">
@@ -67,4 +80,23 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Regenerate Magic Link -->
+    <flux:modal wire:model="showConfirmModal" class="md:w-[420px] space-y-6">
+        <div>
+            <flux:heading size="lg">Buat ulang link Login</flux:heading>
+            <flux:subheading class="mt-2">
+                Apakah Anda yakin ingin membuat ulang link login? Link dan sesi lama akan langsung hangus dan Anda akan dialihkan ke link yang baru.
+            </flux:subheading>
+        </div>
+
+        <div class="flex gap-2 justify-end mt-6">
+            <flux:button wire:click="$set('showConfirmModal', false)" variant="ghost">
+                Tidak
+            </flux:button>
+            <flux:button wire:click="regenerateAndRedirect" variant="danger" icon="arrow-path">
+                Ya, Regenerate
+            </flux:button>
+        </div>
+    </flux:modal>
 </div>

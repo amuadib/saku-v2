@@ -332,7 +332,10 @@
             @endif
         </div>
 
-        <div class="flex gap-2 justify-end mt-6">
+        <div class="flex gap-2 justify-between items-center mt-6">
+            <flux:button wire:click="regenerateMagicLink" wire:confirm="Link dan QR code lama akan langsung hangus dan tidak dapat digunakan lagi. Yakin ingin generate link baru?" variant="danger" icon="arrow-path">
+                Regenerate Link Baru
+            </flux:button>
             <flux:button wire:click="$set('showMagicLinkModal', false)" variant="ghost">Tutup</flux:button>
         </div>
     </flux:modal>

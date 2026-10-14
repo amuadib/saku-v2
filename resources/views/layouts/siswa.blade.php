@@ -49,6 +49,7 @@
         </div>
     </main>
 
+    <flux:toast />
     @fluxScripts
 </body>
 </html>

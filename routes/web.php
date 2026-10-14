@@ -57,7 +57,7 @@ Route::get('/m/{identifier}/{token}', function (string $identifier, string $toke
     auth()->login($user);
 
     return redirect('/dashboard');
-})->name('login.magic');
+})->middleware('throttle:30,1')->name('login.magic');
 
 // Backward compatibility for existing /login/magic/{user} links
 Route::get('/login/magic/{user}', function (User $user) {

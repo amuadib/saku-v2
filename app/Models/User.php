@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -34,6 +35,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'magic_token_salt',
     ];
 
     /**
@@ -112,12 +114,27 @@ class User extends Authenticatable
 
     public function getMagicToken(): string
     {
-        return substr(hash_hmac('sha256', "magic-login:{$this->id}:{$this->username}", config('custom.api_akademik.token')), 0, 16);
+        $payload = $this->magic_token_salt
+            ? "magic-login:{$this->id}:{$this->username}:{$this->magic_token_salt}"
+            : "magic-login:{$this->id}:{$this->username}";
+
+        $secret = config('custom.api_akademik.token') ?: config('app.key');
+
+        return substr(hash_hmac('sha256', $payload, $secret), 0, 16);
     }
 
     public function isValidMagicToken(string $token): bool
     {
         return hash_equals($this->getMagicToken(), $token);
+    }
+
+    public function regenerateMagicToken(): string
+    {
+        $this->forceFill([
+            'magic_token_salt' => Str::random(16),
+        ])->save();
+
+        return $this->getMagicToken();
     }
 
     public function getMagicLoginUrl(?string $baseUrl = null): string

@@ -26,7 +26,7 @@
                 <div class="hidden md:flex space-x-8">
                     <a href="#hero" class="text-sm font-medium text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400 transition-colors">Beranda</a>
                     <a href="#fitur" class="text-sm font-medium text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400 transition-colors">Fitur</a>
-                    <a href="#kontak" class="text-sm font-medium text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400 transition-colors">Kontak & Pengaduan</a>
+                    <a href="#kontak" class="text-sm font-medium text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400 transition-colors">Kontak & Lokasi</a>
                 </div>
                 <div class="flex items-center gap-4">
                     @if (Route::has('login'))
@@ -135,8 +135,72 @@
         </div>
     </section>
 
-    <!-- Contact & Pengaduan -->
+    <!-- Contact & Lokasi -->
     <section id="kontak" class="py-24 bg-gray-50 dark:bg-zinc-950 relative">
+        @php
+            $lembagaList = config('custom.lembaga') ?? [];
+            if (isset($lembagaList[99])) {
+                $contactLembaga = $lembagaList[99];
+            } elseif (!empty($lembagaList)) {
+                ksort($lembagaList, SORT_NUMERIC);
+                $contactLembaga = reset($lembagaList);
+            } else {
+                $contactLembaga = [];
+            }
+
+            $mapEmbedUrl = null;
+            if (!empty($contactLembaga['maps_embed_url'])) {
+                $mapEmbedUrl = $contactLembaga['maps_embed_url'];
+            } elseif (!empty($contactLembaga['maps_embed'])) {
+                $embed = trim((string) $contactLembaga['maps_embed']);
+                if (preg_match('/src=["\']([^"\']+)["\']/', $embed, $matches)) {
+                    $mapEmbedUrl = $matches[1];
+                } elseif (str_starts_with($embed, 'http')) {
+                    $mapEmbedUrl = $embed;
+                }
+            }
+
+            $lat = trim((string) ($contactLembaga['lat'] ?? ''));
+            $lon = trim((string) ($contactLembaga['lon'] ?? ''));
+
+            if (!$mapEmbedUrl) {
+                if (!empty($lat) && !empty($lon) && (float) $lat != 0 && (float) $lon != 0) {
+                    $mapEmbedUrl = "https://maps.google.com/maps?q={$lat},{$lon}&hl=id&z=16&output=embed";
+                } elseif (!empty($contactLembaga['alamat'])) {
+                    $mapEmbedUrl = "https://maps.google.com/maps?q=" . urlencode($contactLembaga['alamat']) . "&hl=id&z=15&output=embed";
+                }
+            }
+
+            $googleMapsDirectUrl = null;
+            if (!empty($lat) && !empty($lon) && (float) $lat != 0 && (float) $lon != 0) {
+                $googleMapsDirectUrl = "https://www.google.com/maps?q={$lat},{$lon}";
+            } elseif (!empty($contactLembaga['alamat'])) {
+                $googleMapsDirectUrl = "https://www.google.com/maps?q=" . urlencode($contactLembaga['alamat']);
+            }
+
+            $rawEmail = !empty($contactLembaga['email']) ? (string) $contactLembaga['email'] : 'info@saku-v2.local';
+
+            $kontakVal = trim((string) ($contactLembaga['kontak'] ?? ''));
+            $telpVal = trim((string) ($contactLembaga['telp'] ?? ''));
+            if (!empty($kontakVal) && preg_match('/^[0-9\+\-\s\(\)]+$/', $kontakVal)) {
+                $rawPhone = $kontakVal;
+            } elseif (!empty($telpVal)) {
+                $rawPhone = $telpVal;
+            } elseif (!empty($kontakVal)) {
+                $rawPhone = $kontakVal;
+            } else {
+                $rawPhone = '+62 812-3456-7890';
+            }
+
+            // Obfuscation for anti-crawler / bot protection
+            $revEmail = strrev($rawEmail);
+            $revPhone = strrev($rawPhone);
+            $b64RevEmail = base64_encode($revEmail);
+            $b64RevPhone = base64_encode($revPhone);
+            $safeRevEmail = str_replace('@', '&#64;', e($revEmail));
+            $safeRevPhone = e($revPhone);
+        @endphp
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-xl overflow-hidden border border-gray-200 dark:border-zinc-800">
                 <div class="grid grid-cols-1 lg:grid-cols-2">
@@ -147,9 +211,12 @@
                         <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-teal-500 dark:bg-teal-800 rounded-full opacity-50 blur-3xl"></div>
                         
                         <div class="relative z-10">
-                            <h2 class="text-3xl font-bold mb-6">Hubungi Kami</h2>
-                            <p class="text-emerald-50 dark:text-emerald-100 mb-10 text-lg leading-relaxed">
-                                Memiliki pertanyaan mengenai SAKU V2 atau butuh bantuan? Tim kami siap membantu Anda dengan cepat.
+                            <h2 class="text-3xl font-bold mb-4">Hubungi Kami</h2>
+                            <p class="text-emerald-100 font-semibold text-lg mb-2">
+                                {{ $contactLembaga['nama'] ?? 'Kantor Yayasan & Lembaga' }}
+                            </p>
+                            <p class="text-emerald-50 dark:text-emerald-100 mb-10 text-sm leading-relaxed">
+                                Memiliki pertanyaan mengenai SAKU V2 atau butuh bantuan administrasi? Silakan kunjungi lokasi kami atau hubungi kontak berikut.
                             </p>
                             
                             <div class="space-y-6">
@@ -158,8 +225,10 @@
                                         <svg class="w-6 h-6 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                     </div>
                                     <div class="ml-4">
-                                        <h4 class="text-lg font-medium">Alamat</h4>
-                                        <p class="text-emerald-100 mt-1">Jl. Pendidikan No. 1, Blitar<br>Jawa Timur, Indonesia</p>
+                                        <h4 class="text-base font-semibold">Alamat</h4>
+                                        <p class="text-emerald-100 text-sm mt-1 leading-relaxed">
+                                            {{ !empty($contactLembaga['alamat']) ? $contactLembaga['alamat'] : 'Jl. Manggar Lingk. Jatikeplek, Klemunan' }}
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="flex items-start">
@@ -167,8 +236,10 @@
                                         <svg class="w-6 h-6 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                                     </div>
                                     <div class="ml-4">
-                                        <h4 class="text-lg font-medium">Email</h4>
-                                        <p class="text-emerald-100 mt-1">info@saku-v2.local</p>
+                                        <h4 class="text-base font-semibold">Email</h4>
+                                        <div data-protect="email" data-token="{{ $b64RevEmail }}" class="mt-1">
+                                            <span class="text-emerald-100 text-sm inline-block select-all" dir="rtl" style="unicode-bidi: bidi-override; direction: rtl;">{!! $safeRevEmail !!}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="flex items-start">
@@ -176,39 +247,65 @@
                                         <svg class="w-6 h-6 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                                     </div>
                                     <div class="ml-4">
-                                        <h4 class="text-lg font-medium">Telepon / WhatsApp</h4>
-                                        <p class="text-emerald-100 mt-1">+62 812-3456-7890</p>
+                                        <h4 class="text-base font-semibold">Telepon / WhatsApp</h4>
+                                        <div data-protect="phone" data-token="{{ $b64RevPhone }}" class="mt-1">
+                                            <span class="text-emerald-100 text-sm inline-block select-all" dir="rtl" style="unicode-bidi: bidi-override; direction: rtl;">{{ $safeRevPhone }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Form Pengaduan -->
-                    <div class="p-10 lg:p-16">
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Form Pengaduan</h3>
-                        <form onsubmit="event.preventDefault(); alert('Terima kasih. Pesan pengaduan Anda telah kami terima dan akan segera diproses.'); this.reset();" class="space-y-6">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Lengkap</label>
-                                <input type="text" id="name" required class="mt-2 block w-full rounded-xl border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm px-4 py-3 transition-colors">
+                    <!-- Google Maps Embed -->
+                    <div class="p-8 lg:p-12 flex flex-col justify-between bg-white dark:bg-zinc-900">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                                <div>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40 mb-2">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                        Peta Lokasi
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                        Lokasi Kami
+                                    </h3>
+                                </div>
+
+                                @if (!empty($googleMapsDirectUrl))
+                                    <a href="{{ $googleMapsDirectUrl }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/50 transition shadow-sm">
+                                        <span>Buka di Google Maps</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                @endif
                             </div>
-                            
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email atau WhatsApp</label>
-                                <input type="text" id="email" required class="mt-2 block w-full rounded-xl border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm px-4 py-3 transition-colors">
-                            </div>
-                            
-                            <div>
-                                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pesan Pengaduan</label>
-                                <textarea id="message" rows="4" required class="mt-2 block w-full rounded-xl border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm px-4 py-3 transition-colors"></textarea>
-                            </div>
-                            
-                            <div>
-                                <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all hover:shadow-lg hover:shadow-emerald-500/30">
-                                    Kirim Pengaduan
-                                </button>
-                            </div>
-                        </form>
+
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
+                                {{ $contactLembaga['alamat'] ?? 'Kunjungi kantor kami untuk informasi lebih lanjut dan pelayanan langsung.' }}
+                            </p>
+                        </div>
+
+                        <!-- Iframe Embed -->
+                        <div class="w-full h-80 sm:h-96 lg:h-[350px] rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm relative bg-gray-100 dark:bg-zinc-800">
+                            @if ($mapEmbedUrl)
+                                <iframe src="{{ $mapEmbedUrl }}"
+                                        width="100%"
+                                        height="100%"
+                                        style="border:0; display:block;"
+                                        allowfullscreen=""
+                                        loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 p-6 text-center">
+                                    <svg class="w-10 h-10 mb-2 opacity-50 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Peta Belum Tersedia</p>
+                                    <p class="text-xs text-gray-400 mt-1">Koordinat atau kode embed peta belum dikonfigurasi.</p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -255,5 +352,107 @@
             animation-delay: 4s;
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function decodeProtected(val) {
+                try {
+                    return atob(val).split('').reverse().join('');
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            function setupCopyBtn(btn, textToCopy) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(textToCopy);
+                    } else {
+                        const ta = document.createElement('textarea');
+                        ta.value = textToCopy;
+                        ta.style.position = 'fixed';
+                        ta.style.opacity = '0';
+                        document.body.appendChild(ta);
+                        ta.focus();
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                    }
+                    const icon = btn.querySelector('.copy-icon');
+                    const check = btn.querySelector('.check-icon');
+                    const feedback = btn.querySelector('.copy-feedback');
+                    if (icon) icon.classList.add('hidden');
+                    if (check) check.classList.remove('hidden');
+                    if (feedback) feedback.classList.remove('hidden');
+                    setTimeout(function () {
+                        if (icon) icon.classList.remove('hidden');
+                        if (check) check.classList.add('hidden');
+                        if (feedback) feedback.classList.add('hidden');
+                    }, 2000);
+                });
+            }
+
+            // Email decoder & interactive UI
+            document.querySelectorAll('[data-protect="email"]').forEach(function (container) {
+                const token = container.getAttribute('data-token');
+                if (!token) return;
+                const email = decodeProtected(token);
+                if (!email) return;
+
+                container.innerHTML = `
+                    <div class="flex items-center gap-2 group flex-wrap">
+                        <a href="mailto:${email}" class="text-emerald-100 hover:text-white hover:underline transition-colors text-sm font-medium inline-flex items-center gap-1.5" title="Kirim email ke ${email}">
+                            <span>${email}</span>
+                            <svg class="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                        <button type="button" class="contact-copy-btn p-1 rounded text-emerald-200 hover:text-white hover:bg-emerald-500/30 transition-all text-xs inline-flex items-center gap-1" title="Salin Email">
+                            <svg class="w-3.5 h-3.5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <svg class="w-3.5 h-3.5 check-icon hidden text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span class="copy-feedback text-[11px] hidden font-medium text-emerald-200">Tersalin</span>
+                        </button>
+                    </div>
+                `;
+
+                const btn = container.querySelector('.contact-copy-btn');
+                if (btn) setupCopyBtn(btn, email);
+            });
+
+            // Phone decoder & interactive WhatsApp UI
+            document.querySelectorAll('[data-protect="phone"]').forEach(function (container) {
+                const token = container.getAttribute('data-token');
+                if (!token) return;
+                const phone = decodeProtected(token);
+                if (!phone) return;
+
+                let cleanPhone = phone.replace(/[^0-9]/g, '');
+                if (cleanPhone.startsWith('0')) {
+                    cleanPhone = '62' + cleanPhone.substring(1);
+                }
+                const waLink = 'https://wa.me/' + cleanPhone;
+
+                container.innerHTML = `
+                    <div class="flex items-center gap-2 group flex-wrap">
+                        <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="text-emerald-100 hover:text-white hover:underline transition-colors text-sm font-medium inline-flex items-center gap-1.5" title="Chat WhatsApp (${phone})">
+                            <span>${phone}</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/40 text-emerald-100 border border-emerald-400/30">
+                                WhatsApp
+                            </span>
+                            <svg class="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                        <button type="button" class="contact-copy-btn p-1 rounded text-emerald-200 hover:text-white hover:bg-emerald-500/30 transition-all text-xs inline-flex items-center gap-1" title="Salin Nomor">
+                            <svg class="w-3.5 h-3.5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <svg class="w-3.5 h-3.5 check-icon hidden text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span class="copy-feedback text-[11px] hidden font-medium text-emerald-200">Tersalin</span>
+                        </button>
+                    </div>
+                `;
+
+                const btn = container.querySelector('.contact-copy-btn');
+                if (btn) setupCopyBtn(btn, phone);
+            });
+        });
+    </script>
 </body>
 </html>

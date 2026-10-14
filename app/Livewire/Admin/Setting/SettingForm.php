@@ -32,14 +32,53 @@ class SettingForm extends Component
     public function loadLembagaItems()
     {
         $lembagaItems = config('custom.lembaga') ?? [];
-        foreach ($lembagaItems as &$lembaga) {
+        foreach ($lembagaItems as $id => &$lembaga) {
             $lembaga['tingkat_string'] = implode(', ', $lembaga['tingkat'] ?? []);
             $jamKerja = $lembaga['jam_kerja'] ?? [];
             $lembaga['jam_kerja_string'] = is_array($jamKerja) ? implode("\n", $jamKerja) : (string) $jamKerja;
             $lembaga['kepala'] = $lembaga['kepala'] ?? '';
             $lembaga['nip_kepala'] = $lembaga['nip_kepala'] ?? '';
+            $lembaga['email'] = $lembaga['email'] ?? '';
+            $lembaga['lat'] = $lembaga['lat'] ?? '';
+            $lembaga['lon'] = $lembaga['lon'] ?? '';
+            $lembaga['maps_embed'] = $lembaga['maps_embed'] ?? '';
+            $lembaga['maps_embed_url'] = $this->getMapsEmbedUrl($lembaga);
         }
         $this->lembaga_items = $lembagaItems;
+    }
+
+    public function getMapsEmbedUrl(array|int|string $lembagaOrId): ?string
+    {
+        $lembaga = is_array($lembagaOrId) ? $lembagaOrId : ($this->lembaga_items[$lembagaOrId] ?? (config('custom.lembaga.'.$lembagaOrId) ?? null));
+        if (! $lembaga) {
+            return null;
+        }
+
+        if (! empty($lembaga['maps_embed_url'])) {
+            return $lembaga['maps_embed_url'];
+        }
+
+        $embed = trim((string) ($lembaga['maps_embed'] ?? ''));
+        if (! empty($embed)) {
+            if (preg_match('/src=["\']([^"\']+)["\']/', $embed, $matches)) {
+                return $matches[1];
+            }
+            if (str_starts_with($embed, 'http')) {
+                return $embed;
+            }
+        }
+
+        $lat = trim((string) ($lembaga['lat'] ?? ''));
+        $lon = trim((string) ($lembaga['lon'] ?? ''));
+        if (! empty($lat) && ! empty($lon) && (float) $lat != 0 && (float) $lon != 0) {
+            return "https://maps.google.com/maps?q={$lat},{$lon}&hl=id&z=16&output=embed";
+        }
+
+        if (! empty($lembaga['alamat'])) {
+            return 'https://maps.google.com/maps?q='.urlencode($lembaga['alamat']).'&hl=id&z=15&output=embed';
+        }
+
+        return null;
     }
 
     public function syncLembaga()
@@ -120,17 +159,32 @@ class SettingForm extends Component
                 $ttd = $item['ttd_url'] ?? ($item['ttd'] ?? ($currentLembaga[$id]['ttd'] ?? null));
                 $stempel = $item['stempel_url'] ?? ($item['stempel'] ?? ($currentLembaga[$id]['stempel'] ?? null));
 
+                $email = $item['email'] ?? ($currentLembaga[$id]['email'] ?? '');
+                $lat = $item['lat'] ?? ($currentLembaga[$id]['lat'] ?? '');
+                $lon = $item['lon'] ?? ($currentLembaga[$id]['lon'] ?? '');
+                $mapsEmbed = $item['maps_embed'] ?? ($currentLembaga[$id]['maps_embed'] ?? '');
+                $alamat = $item['alamat'] ?? ($currentLembaga[$id]['alamat'] ?? '');
+                $mapsEmbedUrl = $item['maps_embed_url'] ?? $this->getMapsEmbedUrl([
+                    'maps_embed' => $mapsEmbed,
+                    'lat' => $lat,
+                    'lon' => $lon,
+                    'alamat' => $alamat,
+                ]);
+
                 $syncedLembaga[$id] = [
                     'nama' => $item['nama'] ?? ($currentLembaga[$id]['nama'] ?? ''),
                     'singkatan' => $singkatan,
                     'alias' => $alias,
-                    'alamat' => $item['alamat'] ?? ($currentLembaga[$id]['alamat'] ?? ''),
+                    'alamat' => $alamat,
                     'kontak' => $item['kontak'] ?? ($currentLembaga[$id]['kontak'] ?? ''),
                     'kepala' => $item['kepala'] ?? ($currentLembaga[$id]['kepala'] ?? ''),
                     'nip_kepala' => $item['nip_kepala'] ?? ($currentLembaga[$id]['nip_kepala'] ?? ''),
                     'telp' => $item['telp'] ?? ($currentLembaga[$id]['telp'] ?? ''),
-                    'lat' => $item['lat'] ?? ($currentLembaga[$id]['lat'] ?? 0),
-                    'lon' => $item['lon'] ?? ($currentLembaga[$id]['lon'] ?? 0),
+                    'email' => $email,
+                    'lat' => $lat,
+                    'lon' => $lon,
+                    'maps_embed' => $mapsEmbed,
+                    'maps_embed_url' => $mapsEmbedUrl,
                     'logo' => $logo,
                     'kop' => $kop,
                     'ttd' => $ttd,

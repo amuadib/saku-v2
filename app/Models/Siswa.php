@@ -152,4 +152,53 @@ class Siswa extends Model
     {
         return $this->lembaga['nip_kepala'] ?? null;
     }
+
+    public function getLembagaEmailAttribute(): ?string
+    {
+        return $this->lembaga['email'] ?? null;
+    }
+
+    public function getLembagaLatAttribute(): mixed
+    {
+        return $this->lembaga['lat'] ?? null;
+    }
+
+    public function getLembagaLonAttribute(): mixed
+    {
+        return $this->lembaga['lon'] ?? null;
+    }
+
+    public function getLembagaMapsEmbedAttribute(): ?string
+    {
+        return $this->lembaga['maps_embed'] ?? null;
+    }
+
+    public function getLembagaMapsEmbedUrlAttribute(): ?string
+    {
+        if (! empty($this->lembaga['maps_embed_url'])) {
+            return $this->lembaga['maps_embed_url'];
+        }
+
+        $embed = trim((string) ($this->lembaga['maps_embed'] ?? ''));
+        if (! empty($embed)) {
+            if (preg_match('/src=["\']([^"\']+)["\']/', $embed, $matches)) {
+                return $matches[1];
+            }
+            if (str_starts_with($embed, 'http')) {
+                return $embed;
+            }
+        }
+
+        $lat = trim((string) ($this->lembaga['lat'] ?? ''));
+        $lon = trim((string) ($this->lembaga['lon'] ?? ''));
+        if (! empty($lat) && ! empty($lon) && (float) $lat != 0 && (float) $lon != 0) {
+            return "https://maps.google.com/maps?q={$lat},{$lon}&hl=id&z=16&output=embed";
+        }
+
+        if (! empty($this->lembaga['alamat'])) {
+            return 'https://maps.google.com/maps?q='.urlencode($this->lembaga['alamat']).'&hl=id&z=15&output=embed';
+        }
+
+        return null;
+    }
 }

@@ -49,18 +49,61 @@
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
                             <flux:input wire:model="lembaga_items.{{ $id }}.singkatan" label="Singkatan / Alias" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.telp" label="Telepon/WA" readonly disabled />
+                            <flux:input wire:model="lembaga_items.{{ $id }}.email" label="Email Lembaga" placeholder="info@sekolah.sch.id" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.tingkat_string" label="Tingkat" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.kontak" label="Kontak Person" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.kepala" label="Nama Kepala Lembaga" readonly disabled />
                             <flux:input wire:model="lembaga_items.{{ $id }}.nip_kepala" label="NIP / NIY Kepala" readonly disabled />
-                            <flux:textarea wire:model="lembaga_items.{{ $id }}.jam_kerja_string" label="Jam Kerja" rows="3" class="sm:col-span-2" readonly disabled />
-                            <flux:textarea wire:model="lembaga_items.{{ $id }}.alamat" label="Alamat Lengkap" rows="3" class="sm:col-span-2" readonly disabled />
+                            <flux:input wire:model="lembaga_items.{{ $id }}.lat" label="Latitude (Lintang)" placeholder="-7.536065" readonly disabled />
+                            <flux:input wire:model="lembaga_items.{{ $id }}.lon" label="Longitude (Bujur)" placeholder="110.592812" readonly disabled />
+                            <flux:textarea wire:model="lembaga_items.{{ $id }}.jam_kerja_string" label="Jam Kerja" rows="3" class="sm:col-span-2 lg:col-span-3" readonly disabled />
+                            <flux:textarea wire:model="lembaga_items.{{ $id }}.alamat" label="Alamat Lengkap" rows="3" class="sm:col-span-2 lg:col-span-3" readonly disabled />
+                            <flux:input wire:model="lembaga_items.{{ $id }}.maps_embed" label="Google Maps Embed (Iframe / URL)" class="sm:col-span-2 lg:col-span-3" readonly disabled />
+
+                            <!-- Bagian Lokasi & Google Maps Preview -->
+                            <div class="sm:col-span-2 lg:col-span-3 pt-3 border-t border-gray-200/60 dark:border-white/10 space-y-2">
+                                @php
+                                    $mapEmbedUrl = $this->getMapsEmbedUrl($id);
+                                @endphp
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <flux:icon name="map-pin" class="size-4 text-emerald-600" />
+                                        <span class="text-sm font-semibold text-gray-800 dark:text-zinc-200">Pratinjau Peta Google Maps</span>
+                                    </div>
+                                    @if (!empty($lembaga['lat']) && !empty($lembaga['lon']) && (float)$lembaga['lat'] != 0)
+                                        <a href="https://www.google.com/maps?q={{ $lembaga['lat'] }},{{ $lembaga['lon'] }}"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1">
+                                            <span>Buka di Google Maps</span>
+                                            <flux:icon name="arrow-top-right-on-square" class="size-3" />
+                                        </a>
+                                    @endif
+                                </div>
+
+                                @if ($mapEmbedUrl)
+                                    <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-800 shadow-sm h-56">
+                                        <iframe src="{{ $mapEmbedUrl }}"
+                                                width="100%"
+                                                height="100%"
+                                                style="border:0; display:block;"
+                                                allowfullscreen=""
+                                                loading="lazy"
+                                                referrerpolicy="no-referrer-when-downgrade">
+                                        </iframe>
+                                    </div>
+                                @else
+                                    <div class="p-4 rounded-xl border border-dashed border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-zinc-800/50 text-center text-xs text-gray-400">
+                                        Belum ada koordinat GPS atau kode embed peta Google Maps yang disinkronkan.
+                                    </div>
+                                @endif
+                            </div>
 
                             <!-- Logo, Kop, TTD & Stempel Preview (Read-only) -->
-                            <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3 border-t border-gray-200/60 dark:border-white/10">
+                            <div class="sm:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3 border-t border-gray-200/60 dark:border-white/10">
                                 @php
                                     $resolveMediaUrl = function (?string $rawPath) {
                                         if (empty($rawPath)) {

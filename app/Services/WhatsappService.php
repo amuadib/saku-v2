@@ -86,8 +86,9 @@ class WhatsappService
         );
 
         $nb = $template['nb'] ?? '';
+        $magic_link = PHP_EOL.'Klik link berikut untuk login ke Aplikasi Siswa: '.$siswa->auth->getMagicLoginUrl().PHP_EOL;
 
-        return $test_message.$awal.$isi.$tabungan.$akhir.$nb.$template['footer'];
+        return $test_message.$awal.$isi.$tabungan.$akhir.$nb.$magic_link.$template['footer'];
     }
 
     public static function prosesTemplate(array $data, string $template): string

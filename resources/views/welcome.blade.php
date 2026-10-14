@@ -20,8 +20,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('logo_full_h.png') }}" alt="SAKU Logo" class="h-10 w-auto hidden dark:block object-contain filter brightness-200">
-                    <img src="{{ asset('logo_full_h.png') }}" alt="SAKU Logo" class="h-10 w-auto block dark:hidden object-contain">
+                    <img src="{{  asset('images/logo_full_h.png')  }}" alt="SAKU Logo" class="h-10 w-auto hidden dark:block object-contain filter brightness-200">
+                    <img src="{{ asset('images/logo_full_h.png') }}" alt="SAKU Logo" class="h-10 w-auto block dark:hidden object-contain">
                 </div>
                 <div class="hidden md:flex space-x-8">
                     <a href="#hero" class="text-sm font-medium text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400 transition-colors">Beranda</a>
@@ -316,11 +316,11 @@
     <footer class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 py-12 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="h-8 w-auto grayscale opacity-70">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto grayscale opacity-70">
                 <span class="text-xl font-bold text-gray-400 dark:text-gray-500">SAKU V2</span>
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400 text-center md:text-left">
-                &copy; {{ date('Y') }} Sistem Administrasi Keuangan Terpadu. All rights reserved.
+                &copy; {{ date('Y') }} Sistem Administrasi Keuangan (SAKU) Versi 2. All rights reserved.
             </p>
             <div class="flex space-x-6">
                 <a href="#" class="text-gray-400 hover:text-emerald-500 transition-colors">

@@ -4,7 +4,10 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Detail Siswa: {{ $siswa->nama }}
             </h2>
-            <flux:button variant="outline" href="{{ route('admin.siswa.index') }}" wire:navigate>Kembali</flux:button>
+            <div class="flex items-center gap-2">
+                <flux:button variant="outline" href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" icon="clock">Log Aktivitas</flux:button>
+                <flux:button variant="outline" href="{{ route('admin.siswa.index') }}" wire:navigate>Kembali</flux:button>
+            </div>
         </div>
     </x-slot>
 
@@ -117,6 +120,21 @@
                                     @endforeach
                                 @else
                                     <flux:text class="font-medium">-</flux:text>
+                                @endif
+                            </div>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm text-gray-500">Login Terakhir</flux:text>
+                            <div class="mt-1">
+                                @if($siswa->last_login_at)
+                                    <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                        <flux:icon name="arrow-top-right-on-square" class="size-3.5" />
+                                        <span>{{ $siswa->last_login_at->translatedFormat('d M Y, H:i') }} ({{ $siswa->last_login_at->diffForHumans() }})</span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="text-xs text-gray-400 dark:text-gray-500 italic hover:underline">
+                                        Belum pernah login
+                                    </a>
                                 @endif
                             </div>
                         </div>

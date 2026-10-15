@@ -21,6 +21,7 @@ use App\Livewire\Admin\Penjualan\PenjualanList;
 use App\Livewire\Admin\Periode\PeriodeForm;
 use App\Livewire\Admin\Periode\PeriodeList;
 use App\Livewire\Admin\Setting\SettingForm;
+use App\Livewire\Admin\Siswa\SiswaAktivitas;
 use App\Livewire\Admin\Siswa\SiswaForm;
 use App\Livewire\Admin\Siswa\SiswaList;
 use App\Livewire\Admin\Siswa\SiswaShow;
@@ -129,6 +130,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/siswa/create', SiswaForm::class)->name('siswa.create');
     Route::get('/siswa/{siswa}/edit', SiswaForm::class)->name('siswa.edit');
     Route::get('/siswa/{siswa}', SiswaShow::class)->name('siswa.show');
+    Route::get('/siswa/{siswa}/aktivitas', SiswaAktivitas::class)->name('siswa.aktivitas');
     Route::get('/siswa/{siswa}/cetak-tagihan', [PrintController::class, 'cetakTagihan'])->name('siswa.cetak-tagihan');
     Route::get('/siswa/{siswa}/cetak-kwitansi', [PrintController::class, 'cetakKwitansi'])->name('siswa.cetak-kwitansi');
     Route::get('/siswa/{siswa}/cetak-transaksi', [PrintController::class, 'cetakTransaksi'])->name('siswa.cetak-transaksi');

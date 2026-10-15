@@ -27,20 +27,130 @@ class Siswa extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
+        'nama_ayah',
+        'nama_ibu',
+        'telepon',
+        'email',
         'lembaga_id',
         'kelas_id',
         'status',
 
         'foto',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     protected $casts = [
-
+        'last_login_at' => 'datetime',
     ];
 
     public function auth()
     {
         return $this->morphOne(User::class, 'authable');
+    }
+
+    public function aktivitas(): HasMany
+    {
+        return $this->hasMany(SiswaAktivitas::class, 'siswa_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (Siswa $siswa) {
+            if (! auth()->check()) {
+                return;
+            }
+
+            $user = auth()->user();
+            $isStudent = ($user->authable_type === Siswa::class && $user->authable_id === $siswa->id)
+                || ($user->authable instanceof Siswa && $user->authable->id === $siswa->id)
+                || request()->routeIs('siswa.*')
+                || request()->is('profil*');
+
+            if (! $isStudent && ! session()->has('impersonate_by')) {
+                return;
+            }
+
+            $ignored = ['updated_at', 'last_login_at', 'last_login_ip'];
+            $changes = array_diff_key($siswa->getChanges(), array_flip($ignored));
+
+            if (empty($changes)) {
+                return;
+            }
+
+            $fieldLabels = [
+                'nama' => 'Nama Lengkap',
+                'nik' => 'NIK',
+                'nis' => 'NIS',
+                'nisn' => 'NISN',
+                'tempat_lahir' => 'Tempat Lahir',
+                'tanggal_lahir' => 'Tanggal Lahir',
+                'jenis_kelamin' => 'Jenis Kelamin',
+                'alamat' => 'Alamat',
+                'nama_ayah' => 'Nama Ayah',
+                'nama_ibu' => 'Nama Ibu',
+                'telepon' => 'No. Telepon/WA',
+                'email' => 'Email',
+                'foto' => 'Foto Profil',
+            ];
+
+            $changedLabels = [];
+            foreach (array_keys($changes) as $key) {
+                $changedLabels[] = $fieldLabels[$key] ?? ucfirst(str_replace('_', ' ', $key));
+            }
+
+            $keterangan = 'Memperbarui profil ('.implode(', ', $changedLabels).')';
+            if (session()->has('impersonate_by')) {
+                $keterangan .= ' (Impersonasi oleh Admin)';
+            }
+
+            $dataLama = [];
+            $dataBaru = [];
+            foreach ($changes as $key => $newValue) {
+                $oldValue = $siswa->getOriginal($key);
+                $dataLama[$key] = $oldValue instanceof \DateTimeInterface ? $oldValue->format('Y-m-d') : $oldValue;
+                $dataBaru[$key] = $newValue instanceof \DateTimeInterface ? $newValue->format('Y-m-d') : $newValue;
+            }
+
+            $request = request();
+            $url = $request->fullUrl();
+            $routeName = $request->route()?->getName();
+
+            // Jika request datang dari internal Livewire endpoint, gunakan URL referer (halaman sebenarnya)
+            if (str_contains($request->path(), 'livewire') || str_contains((string) $routeName, 'livewire')) {
+                $referer = $request->headers->get('referer');
+                if ($referer) {
+                    $url = $referer;
+                    try {
+                        $matchedRoute = app('router')->getRoutes()->match(app('request')->create($referer));
+                        $routeName = $matchedRoute?->getName() ?? 'siswa.profil.detail';
+                    } catch (\Throwable $e) {
+                        $routeName = 'siswa.profil.detail';
+                    }
+                } else {
+                    $url = route('siswa.profil.detail');
+                    $routeName = 'siswa.profil.detail';
+                }
+            }
+
+            $parsed = SiswaAktivitas::parseUserAgent($request->userAgent());
+
+            SiswaAktivitas::create([
+                'siswa_id' => $siswa->id,
+                'user_id' => $user->id,
+                'tipe' => 'ubah_data',
+                'url' => $url,
+                'route_name' => $routeName,
+                'method' => 'POST',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'device' => $parsed['device'],
+                'browser' => $parsed['browser'],
+                'keterangan' => $keterangan,
+                'data_lama' => $dataLama,
+                'data_baru' => $dataBaru,
+            ]);
+        });
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -117,3 +117,86 @@ test('student chat displays admin sender name on replied messages', function () 
         ->test(Chat::class)
         ->assertSeeHtml($adminUser->name);
 });
+
+test('unread chat count is correctly calculated and displayed in sidebar', function () {
+    $siswa = Siswa::create([
+        'nis' => '12345',
+        'nama' => 'Budi Santoso',
+        'status' => 1,
+        'lembaga_id' => 1,
+        'jenis_kelamin' => 'l',
+    ]);
+
+    $adminUser = User::factory()->create([
+        'role_id' => 1,
+    ]);
+
+    expect(ChatMessage::unreadCountForUser($adminUser))->toBe(0);
+
+    ChatMessage::create([
+        'siswa_id' => $siswa->id,
+        'sender_type' => 'siswa',
+        'pesan' => 'Pesan 1',
+        'is_read' => false,
+    ]);
+    ChatMessage::create([
+        'siswa_id' => $siswa->id,
+        'sender_type' => 'siswa',
+        'pesan' => 'Pesan 2',
+        'is_read' => false,
+    ]);
+    ChatMessage::create([
+        'siswa_id' => $siswa->id,
+        'sender_type' => 'admin',
+        'pesan' => 'Pesan admin',
+        'is_read' => false,
+    ]);
+
+    expect(ChatMessage::unreadCountForUser($adminUser))->toBe(2);
+
+    $response = $this->actingAs($adminUser)
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('Chat Siswa');
+
+    // The badge text '2' should be in the rendered HTML
+    expect($response->getContent())->toContain('>2<');
+});
+
+test('unread chat count for siswa counts unread admin messages', function () {
+    $siswa = Siswa::create([
+        'nis' => '12345',
+        'nama' => 'Budi Santoso',
+        'status' => 1,
+        'lembaga_id' => 1,
+        'jenis_kelamin' => 'l',
+    ]);
+
+    $studentUser = User::factory()->create([
+        'role_id' => 5,
+        'authable_type' => Siswa::class,
+        'authable_id' => $siswa->id,
+    ]);
+
+    expect(ChatMessage::unreadCountForUser($studentUser))->toBe(0);
+
+    ChatMessage::create([
+        'siswa_id' => $siswa->id,
+        'sender_type' => 'siswa',
+        'pesan' => 'Pesan siswa',
+        'is_read' => false,
+    ]);
+    ChatMessage::create([
+        'siswa_id' => $siswa->id,
+        'sender_type' => 'admin',
+        'pesan' => 'Balasan admin',
+        'is_read' => false,
+    ]);
+
+    expect(ChatMessage::unreadCountForUser($studentUser))->toBe(1);
+
+    $this->actingAs($studentUser)
+        ->get(route('siswa.dashboard'))
+        ->assertOk()
+        ->assertSee('animate-pulse');
+});

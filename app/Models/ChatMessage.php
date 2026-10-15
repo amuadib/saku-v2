@@ -45,4 +45,29 @@ class ChatMessage extends Model
     {
         return $query->where('is_read', false);
     }
+
+    public static function unreadCountForUser(?User $user = null): int
+    {
+        $user = $user ?? auth()->user();
+        if (! $user) {
+            return 0;
+        }
+
+        if ($user->authable_type === Siswa::class && $user->authable_id) {
+            return static::where('siswa_id', $user->authable_id)
+                ->where('sender_type', 'admin')
+                ->where('is_read', false)
+                ->count();
+        }
+
+        $query = static::where('sender_type', 'siswa')->where('is_read', false);
+
+        if (! $user->isAdmin() && isset($user->authable->lembaga_id)) {
+            $query->whereHas('siswa', function ($q) use ($user) {
+                $q->where('lembaga_id', $user->authable->lembaga_id);
+            });
+        }
+
+        return $query->count();
+    }
 }

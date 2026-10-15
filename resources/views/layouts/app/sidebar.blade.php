@@ -23,6 +23,7 @@
     <body class="min-h-screen bg-gray-50 dark:bg-zinc-950 selection:bg-emerald-500 selection:text-white">
         @php
             $periode_aktif = \App\Models\Periode::where('aktif', true)->first();
+            $unreadChatCount = \App\Models\ChatMessage::unreadCountForUser();
         @endphp
         <!-- Background Effects -->
         <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
@@ -97,7 +98,16 @@
                     @can('viewAny', \App\Models\Supplier::class)
                         <flux:sidebar.item icon="truck" :href="route('admin.supplier.index')" :current="request()->routeIs('admin.supplier.*')" wire:navigate>{{ __('Supplier') }}</flux:sidebar.item>
                     @endcan
-                    <flux:sidebar.item icon="chat-bubble-oval-left-ellipsis" :href="route('admin.chat.index')" :current="request()->routeIs('admin.chat.*')" wire:navigate>{{ __('Chat Siswa') }}</flux:sidebar.item>
+                    <flux:sidebar.item 
+                        icon="chat-bubble-oval-left-ellipsis" 
+                        :href="route('admin.chat.index')" 
+                        :current="request()->routeIs('admin.chat.*')" 
+                        :badge="$unreadChatCount > 0 ? ($unreadChatCount > 99 ? '99+' : (string) $unreadChatCount) : null"
+                        badge:color="red"
+                        badge:variant="solid"
+                        :icon-dot="$unreadChatCount > 0"
+                        wire:navigate
+                    >{{ __('Chat Siswa') }}</flux:sidebar.item>
                     <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('admin.pengaduan.index')" :current="request()->routeIs('admin.pengaduan.*')" wire:navigate>{{ __('Pengaduan') }}</flux:sidebar.item>
                     @can('viewAny', \App\Models\Informasi::class)
                         <flux:sidebar.item icon="newspaper" :href="route('admin.informasi.index')" :current="request()->routeIs('admin.informasi.*')" wire:navigate>{{ __('Informasi') }}</flux:sidebar.item>
@@ -127,7 +137,12 @@
 
         <!-- Mobile User Menu -->
         <flux:header class="lg:hidden bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            <div class="relative">
+                <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+                @if($unreadChatCount > 0)
+                    <span class="absolute top-1 right-1 size-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-zinc-950 pointer-events-none"></span>
+                @endif
+            </div>
 
             <div class="flex-1 flex flex-col items-center justify-center truncate text-zinc-800 dark:text-zinc-200">
                 <div class="text-sm font-semibold">{{ $title ?? '' }}</div>

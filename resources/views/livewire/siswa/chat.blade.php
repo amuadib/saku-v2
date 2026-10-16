@@ -1,10 +1,10 @@
-<div class="bg-gray-50 min-h-screen flex flex-col pb-44" 
+<div class="bg-gray-50 flex-1 flex flex-col h-full min-h-0 overflow-hidden" 
     x-data="{
         scrollToBottom() {
             $nextTick(() => {
-                let el = document.getElementById('chat-scroll-anchor');
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth' });
+                let container = document.getElementById('chat-messages-container');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
                 }
             });
         }
@@ -14,51 +14,51 @@
     @if($messages->isNotEmpty()) wire:poll.visible.4s @endif>
 
     <!-- Top Sticky Header -->
-    <div class="px-5 pt-10 pb-4 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-30">
+    <div class="px-4 py-3 bg-white/95 backdrop-blur-md shadow-xs border-b border-gray-100 shrink-0 z-30">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="{{ route('siswa.dashboard') }}" wire:navigate class="p-2 -ml-2 rounded-full text-gray-500 hover:bg-gray-100 active:scale-95 transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <a href="{{ route('siswa.dashboard') }}" wire:navigate class="p-2 -ml-1 rounded-full text-gray-500 hover:bg-gray-100 active:scale-95 transition shrink-0" title="Kembali ke Beranda">
                     <flux:icon name="arrow-left" class="size-5" />
                 </a>
                 
-                <div class="relative">
-                    <div class="size-11 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold overflow-hidden shadow-xs">
+                <div class="relative shrink-0">
+                    <div class="w-10 h-10 min-w-10 min-h-10 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold overflow-hidden shadow-xs shrink-0" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px;">
                         @if($siswa && $siswa->lembaga_logo_url)
-                            <img src="{{ $siswa->lembaga_logo_url }}" class="size-full object-contain p-1" alt="Logo">
+                            <img src="{{ $siswa->lembaga_logo_url }}" class="w-full h-full object-contain p-1" style="width: 100%; height: 100%; max-width: 40px; max-height: 40px; object-fit: contain;" alt="Logo Lembaga">
                         @else
-                            <flux:icon name="building-office-2" class="size-6 text-emerald-600" />
+                            <flux:icon name="building-office-2" class="size-5 text-emerald-600" />
                         @endif
                     </div>
-                    <span class="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-white ring-1 ring-emerald-400/40"></span>
+                    <span class="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 border-2 border-white ring-1 ring-emerald-400/40"></span>
                 </div>
 
-                <div>
-                    <h2 class="font-bold text-[15px] text-gray-800 leading-tight">Layanan & Bantuan</h2>
+                <div class="min-w-0">
+                    <h2 class="font-bold text-[14px] text-gray-800 leading-tight truncate">Layanan & Bantuan</h2>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="size-1.5 rounded-full bg-emerald-500"></span>
-                        <p class="text-[11px] text-emerald-600 font-medium">
+                        <span class="size-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                        <p class="text-[11px] text-emerald-600 font-medium truncate">
                             {{ config('custom.lembaga.'.($siswa?->lembaga_id ?? 1).'.singkatan', 'Admin') }} &bull; Online
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="text-xs text-gray-400 font-medium hidden sm:block">
+            <div class="text-[11px] font-semibold text-gray-400 px-2 py-0.5 bg-gray-100 rounded-md shrink-0">
                 SAKU V2
             </div>
         </div>
     </div>
 
-    <!-- Messages Container -->
-    <div class="px-4 py-6 flex-1 space-y-4">
+    <!-- Messages Container (Scrollable) -->
+    <div id="chat-messages-container" class="flex-1 overflow-y-auto px-4 py-4 space-y-3.5 overscroll-contain min-h-0">
         @if($messages->isEmpty())
             <!-- Welcome Empty State -->
-            <div class="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 text-center space-y-4 mt-2">
-                <div class="size-14 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <flux:icon name="chat-bubble-left-right" class="size-7" />
+            <div class="bg-white rounded-3xl p-5 shadow-xs border border-gray-100 text-center space-y-3.5 my-auto">
+                <div class="size-12 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <flux:icon name="chat-bubble-left-right" class="size-6" />
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-base">Halo, {{ $siswa?->nama ?? 'Siswa' }}! 👋</h3>
+                    <h3 class="font-bold text-gray-800 text-sm">Halo, {{ $siswa?->nama ?? 'Siswa' }}! 👋</h3>
                     <p class="text-xs text-gray-500 mt-1 leading-relaxed max-w-xs mx-auto">
                         Ada pertanyaan mengenai tagihan, tabungan, transaksi, atau butuh bantuan administrasi? Silakan kirim pesan ke pihak sekolah di sini.
                     </p>
@@ -66,15 +66,15 @@
 
                 <!-- Suggestion Chips -->
                 <div class="pt-2 border-t border-gray-100 text-left space-y-2">
-                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Pertanyaan Cepat:</div>
+                    <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Pertanyaan Cepat:</div>
                     <div class="flex flex-col gap-1.5">
-                        <button type="button" wire:click="sendQuickMessage('Halo Admin, mohon info rincian tagihan saya yang belum dibayar.')" class="w-full text-left px-3.5 py-2.5 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-xs transition border border-gray-100">
+                        <button type="button" wire:click="sendQuickMessage('Halo Admin, mohon info rincian tagihan saya yang belum dibayar.')" class="w-full text-left px-3 py-2 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-xs transition border border-gray-100">
                             💬 Mohon info rincian tagihan
                         </button>
-                        <button type="button" wire:click="sendQuickMessage('Halo Admin, saya ingin menanyakan saldo tabungan dan cara penarikan.')" class="w-full text-left px-3.5 py-2.5 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-xs transition border border-gray-100">
+                        <button type="button" wire:click="sendQuickMessage('Halo Admin, saya ingin menanyakan saldo tabungan dan cara penarikan.')" class="w-full text-left px-3 py-2 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-xs transition border border-gray-100">
                             💰 Cek saldo tabungan & penarikan
                         </button>
-                        <button type="button" wire:click="sendQuickMessage('Halo Admin, jam operasional layanan tata usaha buka sampai jam berapa ya?')" class="w-full text-left px-3.5 py-2.5 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-xs transition border border-gray-100">
+                        <button type="button" wire:click="sendQuickMessage('Halo Admin, jam operasional layanan tata usaha buka sampai jam berapa ya?')" class="w-full text-left px-3 py-2 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 text-xs transition border border-gray-100">
                             🕒 Info jam operasional layanan tata usaha
                         </button>
                     </div>
@@ -82,7 +82,7 @@
             </div>
         @else
             <!-- Notice Banner -->
-            <div class="text-center my-2">
+            <div class="text-center my-1">
                 <span class="inline-block px-3 py-1 rounded-full text-[10px] font-semibold bg-gray-200/70 text-gray-600">
                     Pesan Anda terhubung langsung dengan Admin / Tata Usaha
                 </span>
@@ -93,7 +93,7 @@
                 @if($msg->sender_type === 'siswa')
                     <!-- Siswa Bubble (Right) -->
                     <div class="flex flex-col items-end">
-                        <div class="max-w-[82%] bg-emerald-600 text-white rounded-2xl rounded-tr-xs px-4 py-2.5 shadow-xs text-sm leading-relaxed break-words">
+                        <div class="max-w-[82%] bg-emerald-600 text-white rounded-2xl rounded-tr-xs px-3.5 py-2 shadow-xs text-sm leading-relaxed break-words">
                             {{ $msg->pesan }}
                         </div>
                         <div class="flex items-center gap-1 mt-1 text-[10px] text-gray-400 pr-1">
@@ -112,7 +112,7 @@
                             <span class="text-[11px] font-semibold text-emerald-700">{{ $msg->sender?->name ?? 'Admin' }}</span>
                             <span class="px-1.5 py-0.2 rounded text-[9px] bg-emerald-100 text-emerald-800 font-bold">Resmi</span>
                         </div>
-                        <div class="max-w-[82%] bg-white text-gray-800 border border-gray-200/80 rounded-2xl rounded-tl-xs px-4 py-2.5 shadow-xs text-sm leading-relaxed break-words">
+                        <div class="max-w-[82%] bg-white text-gray-800 border border-gray-200/80 rounded-2xl rounded-tl-xs px-3.5 py-2 shadow-xs text-sm leading-relaxed break-words">
                             {{ $msg->pesan }}
                         </div>
                         <div class="mt-1 text-[10px] text-gray-400 pl-1">
@@ -122,25 +122,26 @@
                 @endif
             @endforeach
 
-            <div id="chat-scroll-anchor" class="h-2"></div>
+            <div id="chat-scroll-anchor" class="h-1"></div>
         @endif
     </div>
 
-    <!-- Fixed Bottom Input Bar (Positioned above bottom nav) -->
-    <div class="fixed bottom-[74px] left-0 right-0 max-w-md mx-auto px-4 z-40">
-        <form wire:submit="sendMessage" class="bg-white/95 backdrop-blur-md rounded-2xl p-2 shadow-lg border border-gray-200/80 flex items-center gap-2">
+    <!-- Bottom Input Bar (Positioned directly above bottom nav) -->
+    <div class="shrink-0 bg-white border-t border-gray-200/80 px-3 py-2 z-30">
+        <form wire:submit="sendMessage" class="flex items-center gap-2">
             <input 
                 type="text" 
                 wire:model="pesan" 
+                @focus="scrollToBottom()"
                 placeholder="Tulis pesan ke admin..." 
-                class="flex-1 bg-transparent px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none"
+                class="flex-1 bg-gray-100 hover:bg-gray-50 focus:bg-white rounded-xl px-3.5 py-2 text-sm text-gray-800 placeholder-gray-400 border border-transparent focus:border-emerald-500 focus:outline-none transition shadow-inner"
                 autocomplete="off"
             />
             <button 
                 type="submit" 
                 wire:loading.attr="disabled"
                 wire:target="sendMessage"
-                class="size-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all disabled:opacity-50 active:scale-95 shadow-md shadow-emerald-600/30 flex-shrink-0"
+                class="size-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all disabled:opacity-50 active:scale-95 shadow-md shadow-emerald-600/30 shrink-0"
                 title="Kirim Pesan"
             >
                 <span wire:loading.remove wire:target="sendMessage">

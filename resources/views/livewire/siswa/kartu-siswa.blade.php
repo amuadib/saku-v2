@@ -19,9 +19,9 @@
 
             <!-- Header: Logo and School Name -->
             <div class="bg-white px-5 py-4 flex items-center gap-4 z-10">
-                <div class="flex-shrink-0 size-14 rounded-full border-[2.5px] border-amber-500 flex items-center justify-center bg-white p-1.5 overflow-hidden">
+                <div class="flex-shrink-0 size-14 rounded-full border-[2.5px] border-amber-500 flex items-center justify-center bg-white p-1.5 overflow-hidden" style="width: 56px; height: 56px; min-width: 56px; min-height: 56px;">
                     @if($siswa->lembaga_logo_url)
-                        <img src="{{ $siswa->lembaga_logo_url }}" class="size-full object-contain" alt="Logo Lembaga" />
+                        <img src="{{ $siswa->lembaga_logo_url }}" class="size-full object-contain" style="width: 100%; height: 100%; max-width: 56px; max-height: 56px; object-fit: contain;" alt="Logo Lembaga" />
                     @else
                         <x-app-logo-icon class="size-full object-contain text-emerald-600" />
                     @endif

@@ -14,15 +14,16 @@
 </head>
 <body class="antialiased min-h-screen text-gray-800">
 
-    <main class="w-full max-w-md mx-auto relative min-h-screen bg-[#f8f9fc] overflow-x-hidden shadow-2xl pb-24">
+    @php
+        $isChatRoute = request()->routeIs('siswa.chat') || request()->is('chat*');
+        $unreadChatCount = \App\Models\ChatMessage::unreadCountForUser();
+    @endphp
+
+    <main class="w-full max-w-md mx-auto relative bg-[#f8f9fc] shadow-2xl {{ $isChatRoute ? 'h-[100dvh] flex flex-col overflow-hidden pb-0' : 'min-h-screen pb-24 overflow-x-hidden' }}">
         {{ $slot }}
 
-        @php
-            $unreadChatCount = \App\Models\ChatMessage::unreadCountForUser();
-        @endphp
-
         <!-- Bottom Navigation -->
-        <div class="fixed bottom-0 w-full max-w-md mx-auto bg-white border-t border-gray-100 flex justify-between items-center px-6 py-3 pb-safe-bottom z-50 rounded-t-3xl shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+        <div class="{{ $isChatRoute ? 'shrink-0 z-40' : 'fixed bottom-0 z-50 rounded-t-3xl shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]' }} w-full max-w-md mx-auto bg-white border-t border-gray-100 flex justify-between items-center px-6 py-2.5 pb-safe-bottom">
             <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('dashboard') ? 'text-emerald-600' : 'text-gray-400' }}">
                 <div class="{{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-600 rounded-full px-5 py-1' : 'px-5 py-1 text-gray-400' }} flex items-center justify-center transition-colors">
                     <flux:icon name="home" class="size-6" variant="{{ request()->routeIs('dashboard') ? 'solid' : 'outline' }}" />

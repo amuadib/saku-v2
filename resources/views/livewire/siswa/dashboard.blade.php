@@ -7,9 +7,9 @@
         
         <div class="relative z-10 flex justify-between items-start">
             <div class="flex items-center gap-4">
-                <div class="bg-white/10 backdrop-blur-md border border-white/20 {{ $logoUrl ? 'p-1' : 'p-2.5' }} rounded-2xl flex items-center justify-center aspect-square h-14 w-14 shadow-inner overflow-hidden">
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 {{ $logoUrl ? 'p-1' : 'p-2.5' }} rounded-2xl flex items-center justify-center aspect-square h-14 w-14 shrink-0 shadow-inner overflow-hidden" style="width: 56px; height: 56px; min-width: 56px; min-height: 56px;">
                     @if($logoUrl)
-                        <img src="{{ $logoUrl }}" alt="{{ $lembaga['nama'] ?? $siswa->nama }}" class="w-full h-full object-contain rounded-xl" />
+                        <img src="{{ $logoUrl }}" alt="{{ $lembaga['nama'] ?? $siswa->nama }}" class="w-full h-full object-contain rounded-xl" style="width: 100%; height: 100%; max-width: 56px; max-height: 56px; object-fit: contain;" />
                     @else
                         <x-app-logo-icon class="size-8 object-contain drop-shadow-md text-white" />
                     @endif

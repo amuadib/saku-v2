@@ -14,36 +14,33 @@ class TagihanList extends Component
 
     public $siswa;
 
-    public $status = 'Semua';
-
     public function mount()
     {
         $this->siswa = Auth::user()->authable;
     }
 
-    public function setStatus($status)
-    {
-        $this->status = $status;
-        $this->resetPage();
-    }
-
     #[Layout('layouts.siswa', ['title' => 'Tagihan Siswa'])]
     public function render()
     {
-        $query = Tagihan::with('kas')->where('siswa_id', $this->siswa->id);
-
-        if ($this->status === 'Lunas') {
-            $query->whereColumn('bayar', '>=', 'jumlah');
-        } elseif ($this->status === 'Belum Lunas') {
-            $query->where(function ($q) {
+        $query = Tagihan::with('kas')
+            ->where('siswa_id', $this->siswa->id)
+            ->where(function ($q) {
                 $q->whereNull('bayar')->orWhereColumn('bayar', '<', 'jumlah');
             });
-        }
+
+        $totalTagihan = (float) ((clone $query)->sum('jumlah') ?? 0);
+        $totalTelahBayar = (float) ((clone $query)->sum('bayar') ?? 0);
+        $totalBelumLunas = max(0, $totalTagihan - $totalTelahBayar);
+        $countBelumLunas = (clone $query)->count();
 
         $tagihans = $query->latest()->paginate(15);
 
         return view('livewire.siswa.tagihan-list', [
             'tagihans' => $tagihans,
+            'totalBelumLunas' => $totalBelumLunas,
+            'totalTagihan' => $totalTagihan,
+            'totalTelahBayar' => $totalTelahBayar,
+            'countBelumLunas' => $countBelumLunas,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Siswa;
 
 use App\Models\Informasi;
+use App\Models\Tagihan;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -29,11 +30,23 @@ class Dashboard extends Component
             ->take(5)
             ->get();
 
+        $tagihanTerakhir = $siswa
+            ? Tagihan::with('kas')
+                ->where('siswa_id', $siswa->id)
+                ->where(function ($q) {
+                    $q->whereNull('bayar')->orWhereColumn('bayar', '<', 'jumlah');
+                })
+                ->latest()
+                ->take(3)
+                ->get()
+            : collect();
+
         return view('livewire.siswa.dashboard', [
             'lembaga' => $lembaga,
             'logoUrl' => $logoUrl,
             'siswa' => $siswa,
             'saldo' => $siswa?->tabungan?->sum('saldo') ?? 0,
+            'tagihanTerakhir' => $tagihanTerakhir,
             'informasiSticky' => $informasiSticky,
             'informasiLainnya' => $informasiLainnya,
         ])->layout('layouts.siswa', ['title' => 'Dashboard Siswa']);

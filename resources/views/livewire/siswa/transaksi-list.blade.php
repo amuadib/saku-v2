@@ -5,7 +5,7 @@
             <a href="{{ route('siswa.dashboard') }}" wire:navigate class="p-2 -ml-2 rounded-full text-gray-500 hover:bg-gray-100 transition">
                 <flux:icon name="arrow-left" class="size-5" />
             </a>
-            <h2 class="font-bold text-xl text-gray-800">Semua Transaksi</h2>
+            <h2 class="font-bold text-xl text-gray-800">Semua Transaksi Pembayaran</h2>
         </div>
         
         <!-- Category Pills -->
@@ -13,7 +13,7 @@
             <button wire:click="setKategori('Semua')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition {{ $kategori === 'Semua' ? 'bg-emerald-600 text-white shadow-sm' : 'border border-emerald-600 text-emerald-600 hover:bg-emerald-50' }}">Semua</button>
             <button wire:click="setKategori('Tabungan')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition {{ $kategori === 'Tabungan' ? 'bg-emerald-600 text-white shadow-sm' : 'border border-emerald-600 text-emerald-600 hover:bg-emerald-50' }}">Tabungan</button>
             <button wire:click="setKategori('Tagihan')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition {{ $kategori === 'Tagihan' ? 'bg-emerald-600 text-white shadow-sm' : 'border border-emerald-600 text-emerald-600 hover:bg-emerald-50' }}">Tagihan</button>
-            <button wire:click="setKategori('Penjualan')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition {{ $kategori === 'Penjualan' ? 'bg-emerald-600 text-white shadow-sm' : 'border border-emerald-600 text-emerald-600 hover:bg-emerald-50' }}">Toko / Kantin</button>
+            <button wire:click="setKategori('Penjualan')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition {{ $kategori === 'Penjualan' ? 'bg-emerald-600 text-white shadow-sm' : 'border border-emerald-600 text-emerald-600 hover:bg-emerald-50' }}">Koperasi</button>
         </div>
     </div>
 

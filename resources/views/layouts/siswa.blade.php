@@ -7,9 +7,18 @@
     <title>{{ $title ?? config('app.name', 'Saku v2') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @fluxAppearance
+    <script>
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+    </script>
     <style>
         body { background-color: #f8fafc; }
         .pb-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        dialog::backdrop {
+            background-color: rgba(15, 23, 42, 0.45) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen text-gray-800">

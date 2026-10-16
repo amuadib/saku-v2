@@ -21,10 +21,12 @@
                 </div>
             </div>
 
-            <!-- Notification Bell -->
-            <button class="bg-white/10 backdrop-blur-md border border-white/20 size-8 rounded-full text-white hover:bg-white/20 transition flex items-center justify-center shrink-0" title="Notifikasi">
-                <flux:icon name="bell" class="size-4" variant="outline" />
-            </button>
+            <!-- Tombol About Program -->
+            <flux:modal.trigger name="about-program">
+                <button type="button" class="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 size-8.5 rounded-full text-white shadow-sm active:scale-95 transition flex items-center justify-center shrink-0 cursor-pointer" title="Tentang Program">
+                    <flux:icon name="information-circle" class="size-5" variant="outline" />
+                </button>
+            </flux:modal.trigger>
         </div>
 
         <!-- Profil Siswa Menonjol (Data Singkat Siswa) -->
@@ -286,4 +288,158 @@
             </div>
         @endif
     </div>
+
+    <!-- Modal Tentang Program (About - Bright & Clean Mode) -->
+    <flux:modal name="about-program" variant="bare" class="w-full max-w-sm sm:max-w-md mx-auto p-4">
+        <div class="bg-white rounded-[28px] p-6 shadow-2xl border border-gray-100 space-y-5 relative text-gray-800 max-h-[88vh] overflow-y-auto">
+            <!-- Close Button -->
+            <div class="absolute top-4 right-4 z-10">
+                <flux:modal.close>
+                    <button type="button" class="size-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-700 flex items-center justify-center transition active:scale-95 cursor-pointer" aria-label="Tutup">
+                        <flux:icon name="x-mark" class="size-4" />
+                    </button>
+                </flux:modal.close>
+            </div>
+
+            <!-- Header: Logo, Nama, Versi (Bright & Fresh) -->
+            <div class="text-center pt-2">
+                <div class="size-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md shadow-emerald-500/20 p-2 mx-auto flex items-center justify-center mb-3 ring-4 ring-emerald-50">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="Logo" class="size-full object-contain" />
+                    @else
+                        <x-app-logo-icon class="size-9 text-white" />
+                    @endif
+                </div>
+
+                <div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-100 mb-2">
+                    <flux:icon name="sparkles" class="size-3.5 text-emerald-600" />
+                    <span>{{ config('app.name', 'SAKU') }}</span>
+                    <span class="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded-full font-semibold">v2.0</span>
+                </div>
+
+                <h3 class="text-lg font-bold text-gray-900 tracking-tight">
+                    {{ config('custom.app.nama', 'Sistem Administrasi Keuangan') }}
+                </h3>
+                
+                <p class="text-xs text-gray-500 mt-1.5 leading-relaxed max-w-xs mx-auto">
+                    {{ config('custom.app.keterangan') ?? 'Platform portal transparansi administrasi keuangan, tabungan, dan layanan informasi sekolah.' }}
+                </p>
+            </div>
+
+            <div class="h-px bg-gray-100 my-1"></div>
+
+            <!-- Fitur & Layanan Utama (Bright cards with colorful badges) -->
+            <div class="space-y-2.5">
+                <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Fitur & Layanan Utama</div>
+                
+                <div class="space-y-2 text-left">
+                    <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/60 transition">
+                        <div class="size-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                            <flux:icon name="wallet" class="size-4" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-gray-900">Buku Tabungan Digital</div>
+                            <div class="text-[11px] text-gray-500 leading-snug mt-0.5">Pantau saldo, mutasi setor & penarikan tabungan siswa secara transparan.</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/60 transition">
+                        <div class="size-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                            <flux:icon name="banknotes" class="size-4" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-gray-900">Monitoring Tagihan Sekolah</div>
+                            <div class="text-[11px] text-gray-500 leading-snug mt-0.5">Cek rincian kewajiban administrasi & SPP yang belum lunas secara akurat.</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/60 transition">
+                        <div class="size-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                            <flux:icon name="chat-bubble-oval-left-ellipsis" class="size-4" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-gray-900">Layanan Bantuan & Chat</div>
+                            <div class="text-[11px] text-gray-500 leading-snug mt-0.5">Konsultasi dan konfirmasi pembayaran langsung ke petugas tata usaha.</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/60 transition">
+                        <div class="size-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 mt-0.5">
+                            <flux:icon name="megaphone" class="size-4" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-gray-900">Informasi & Pengumuman</div>
+                            <div class="text-[11px] text-gray-500 leading-snug mt-0.5">Akses berita kegiatan dan edaran resmi dari madrasah / sekolah.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kartu Pengembang / Developer Info (Menarik, Rapi & Interaktif) -->
+            <div class="p-4 bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-slate-50 rounded-2xl border border-emerald-150/80 shadow-xs space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[10px] font-bold tracking-wider text-emerald-800 uppercase">Informasi Pengembang</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-0.5">
+                    <div class="size-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-extrabold text-sm shadow-md shadow-emerald-600/20 shrink-0 ring-2 ring-white">
+                        AM
+                    </div>
+                    <div class="min-w-0 flex-1 text-left">
+                        <div class="font-bold text-sm text-gray-900 truncate flex items-center gap-1.5">
+                            <span>AMuadib</span>
+                            <flux:icon name="check-badge" class="size-4 text-emerald-600 shrink-0" variant="solid" />
+                        </div>
+                        <div class="text-[11px] text-gray-500 flex items-center gap-1">
+                            <flux:icon name="code-bracket" class="size-3 text-emerald-600 shrink-0" />
+                            <span class="truncate">Fullstack Developer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2 pt-1">
+                    <!-- Email -->
+                    <a href="mailto:a.muadib@gmail.com" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white hover:bg-emerald-50/60 border border-gray-150 hover:border-emerald-200 text-gray-700 hover:text-emerald-700 transition group shadow-2xs">
+                        <div class="size-7 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 flex items-center justify-center shrink-0 transition">
+                            <flux:icon name="envelope" class="size-3.5" />
+                        </div>
+                        <div class="min-w-0 flex-1 text-left">
+                            <div class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Email</div>
+                            <div class="text-[11px] font-medium text-gray-800 group-hover:text-emerald-700 truncate">a.muadib@gmail.com</div>
+                        </div>
+                    </a>
+
+                    <!-- GitHub -->
+                    <a href="https://github.com/amuadib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white hover:bg-zinc-50 border border-gray-150 hover:border-zinc-300 text-gray-700 hover:text-zinc-900 transition group shadow-2xs">
+                        <div class="size-7 rounded-lg bg-zinc-100 text-zinc-700 group-hover:bg-zinc-200 flex items-center justify-center shrink-0 transition">
+                            <svg class="size-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1 text-left">
+                            <div class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">GitHub</div>
+                            <div class="text-[11px] font-medium text-gray-800 group-hover:text-zinc-900 truncate">github.com/amuadib</div>
+                        </div>
+                        <flux:icon name="arrow-top-right-on-square" class="size-3 text-gray-300 group-hover:text-gray-500 mr-1 shrink-0" />
+                    </a>
+                </div>
+
+                <div class="text-center text-[10px] text-gray-400 pt-1 border-t border-emerald-100/60">
+                    &copy; 2026 YPIB • Hak Cipta Dilindungi
+                </div>
+            </div>
+
+            <!-- Tombol Tutup (Clean, bright, solid emerald) -->
+            <div class="pt-1">
+                <flux:modal.close>
+                    <button type="button" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs tracking-wide shadow-sm active:scale-[0.99] transition cursor-pointer">
+                        Tutup Informasi
+                    </button>
+                </flux:modal.close>
+            </div>
+        </div>
+    </flux:modal>
 </div>

@@ -395,19 +395,18 @@
                     id="admin-file-input" 
                     wire:model="attachment" 
                     accept="image/*,application/pdf" 
-                    class="hidden" 
+                    class="sr-only" 
                 />
 
                 <div class="p-3">
                     <form wire:submit="sendMessage" class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            onclick="document.getElementById('admin-file-input').click()"
-                            class="size-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-zinc-500 flex items-center justify-center transition shrink-0 active:scale-95"
+                        <label 
+                            for="admin-file-input"
+                            class="size-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600 dark:hover:text-emerald-400 text-zinc-500 flex items-center justify-center transition shrink-0 active:scale-95 cursor-pointer"
                             title="Lampirkan File / Gambar / PDF"
                         >
-                            <flux:icon name="paper-clip" class="size-5" />
-                        </button>
+                            <flux:icon name="paper-clip" class="size-5 pointer-events-none" />
+                        </label>
 
                         <input 
                             type="text" 

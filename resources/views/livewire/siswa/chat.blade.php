@@ -1,14 +1,13 @@
 <div class="bg-gray-50 flex-1 flex flex-col h-full min-h-0 overflow-hidden relative" 
     x-data="{
         scrollToBottom() {
-            $nextTick(() => {
-                let container = document.getElementById('chat-messages-container');
+            this.$nextTick(() => {
+                const container = document.getElementById('chat-messages-container');
                 if (container) {
                     container.scrollTop = container.scrollHeight;
                 }
             });
         },
-        showAttachMenu: false,
         showCameraModal: false,
         cameraStream: null,
         capturedDataUrl: null,
@@ -18,7 +17,6 @@
         lightboxUrl: null,
 
         async openCamera() {
-            this.showAttachMenu = false;
             this.capturedDataUrl = null;
             this.cameraError = null;
             this.showCameraModal = true;
@@ -31,7 +29,7 @@
             this.stopStream();
             try {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error('Kamera tidak didukung oleh browser ini.');
+                    throw new Error('Kamera langsung di browser tidak didukung atau memerlukan koneksi aman (HTTPS).');
                 }
                 const constraints = {
                     video: {
@@ -51,7 +49,7 @@
                 });
             } catch (err) {
                 console.error('Camera error:', err);
-                this.cameraError = 'Tidak dapat mengakses kamera. Pastikan izin kamera aktif di browser, atau gunakan kamera bawaan ponsel.';
+                this.cameraError = 'Kamera langsung tidak dapat diakses (' + (err.message || 'Izin ditolak') + '). Anda dapat menggunakan opsi kamera ponsel di bawah.';
             } finally {
                 this.cameraLoading = false;
             }
@@ -93,7 +91,7 @@
                 .then(res => res.blob())
                 .then(blob => {
                     const file = new File([blob], 'foto_kamera_' + Date.now() + '.jpg', { type: 'image/jpeg' });
-                    @this.upload('attachment', file, () => {
+                    $wire.upload('attachment', file, () => {
                         this.closeCamera();
                         this.scrollToBottom();
                     }, (err) => {
@@ -251,7 +249,7 @@
                             @if($msg->is_read)
                                 <svg class="size-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7M5 13l4 4L19 7"></path></svg>
                             @else
-                                <svg class="size-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <svg class="size-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7M5 13l4 4L19 7"></path></svg>
                             @endif
                         </div>
                     </div>
@@ -389,100 +387,54 @@
             </div>
         @enderror
 
-        <!-- Hidden Inputs for File and Mobile Native Camera -->
+        <!-- Hidden Native File Inputs (sr-only, fully accessible & native click target) -->
+        <!-- 1. Document & Image File Picker -->
         <input 
             type="file" 
-            id="file-input-siswa" 
+            id="chat-file-input" 
             wire:model="attachment" 
             accept="image/*,application/pdf" 
-            class="hidden" 
+            class="sr-only" 
         />
+        <!-- 2. Mobile Native Camera Direct Trigger -->
         <input 
             type="file" 
-            id="camera-native-input-siswa" 
+            id="chat-camera-native" 
             wire:model="attachment" 
             accept="image/*" 
             capture="environment" 
-            class="hidden" 
+            class="sr-only" 
         />
 
         <div class="px-3 py-2">
             <form wire:submit="sendMessage" class="flex items-center gap-2">
                 
-                <!-- Attachment Menu Button & Dropdown -->
-                <div class="relative shrink-0" @click.outside="showAttachMenu = false">
-                    <button 
-                        type="button" 
-                        @click="showAttachMenu = !showAttachMenu"
-                        class="size-10 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-emerald-700 text-gray-500 flex items-center justify-center transition active:scale-95"
-                        title="Lampirkan File atau Ambil Foto"
-                    >
-                        <flux:icon name="paper-clip" class="size-5" />
-                    </button>
+                <!-- Tombol 1: Upload File (PDF / Gambar) -->
+                <label 
+                    for="chat-file-input" 
+                    class="size-10 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-emerald-700 text-gray-500 flex items-center justify-center transition active:scale-95 cursor-pointer shrink-0"
+                    title="Upload File (PDF / Gambar)"
+                >
+                    <flux:icon name="paper-clip" class="size-5 pointer-events-none" />
+                </label>
 
-                    <!-- Attachment Popover Menu -->
-                    <div 
-                        x-show="showAttachMenu" 
-                        x-transition:enter="transition ease-out duration-150"
-                        x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-100"
-                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                        class="absolute bottom-12 left-0 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 p-1.5 z-50 space-y-1"
-                        style="display: none;"
-                    >
-                        <button 
-                            type="button" 
-                            @click="document.getElementById('file-input-siswa').click(); showAttachMenu = false"
-                            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 text-gray-700 text-xs font-semibold transition text-left"
-                        >
-                            <div class="size-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                                <flux:icon name="document-text" class="size-4" />
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-800">Upload File (PDF / Gambar)</p>
-                                <p class="text-[10px] text-gray-400 font-normal">Pilih berkas dari perangkat</p>
-                            </div>
-                        </button>
-
-                        <button 
-                            type="button" 
-                            @click="openCamera()"
-                            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 text-gray-700 text-xs font-semibold transition text-left"
-                        >
-                            <div class="size-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                <flux:icon name="camera" class="size-4" />
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-800">Buka Kamera Langsung</p>
-                                <p class="text-[10px] text-gray-400 font-normal">Ambil foto via browser</p>
-                            </div>
-                        </button>
-
-                        <button 
-                            type="button" 
-                            @click="document.getElementById('camera-native-input-siswa').click(); showAttachMenu = false"
-                            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 text-xs transition text-left"
-                        >
-                            <div class="size-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                                <flux:icon name="device-phone-mobile" class="size-4" />
-                            </div>
-                            <div>
-                                <p class="text-xs font-medium text-gray-700">Kamera Bawaan Ponsel</p>
-                                <p class="text-[10px] text-gray-400 font-normal">Aplikasi kamera HP</p>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                <!-- Tombol 2: Ambil Foto Kamera -->
+                <button 
+                    type="button" 
+                    @click="openCamera()"
+                    class="size-10 rounded-xl bg-gray-100 hover:bg-emerald-50 hover:text-emerald-700 text-gray-500 flex items-center justify-center transition active:scale-95 shrink-0"
+                    title="Ambil Foto dari Kamera"
+                >
+                    <flux:icon name="camera" class="size-5 pointer-events-none" />
+                </button>
 
                 <!-- Text Input -->
                 <input 
                     type="text" 
                     wire:model="pesan" 
                     @focus="scrollToBottom()"
-                    placeholder="{{ $attachment ? 'Beri keterangan berkas (opsional)...' : 'Tulis pesan ke admin...' }}" 
-                    class="flex-1 bg-gray-100 hover:bg-gray-50 focus:bg-white rounded-xl px-3.5 py-2 text-sm text-gray-800 placeholder-gray-400 border border-transparent focus:border-emerald-500 focus:outline-none transition shadow-inner"
+                    placeholder="{{ $attachment ? 'Beri keterangan (opsional)...' : 'Tulis pesan ke admin...' }}" 
+                    class="flex-1 min-w-0 bg-gray-100 hover:bg-gray-50 focus:bg-white rounded-xl px-3.5 py-2 text-sm text-gray-800 placeholder-gray-400 border border-transparent focus:border-emerald-500 focus:outline-none transition shadow-inner"
                     autocomplete="off"
                 />
 
@@ -495,7 +447,7 @@
                     title="Kirim Pesan"
                 >
                     <span wire:loading.remove wire:target="sendMessage,attachment">
-                        <flux:icon name="paper-airplane" class="size-4" />
+                        <flux:icon name="paper-airplane" class="size-4 pointer-events-none" />
                     </span>
                     <span wire:loading wire:target="sendMessage,attachment">
                         <svg class="animate-spin size-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -568,20 +520,20 @@
                     <p class="text-xs text-gray-300 mt-1.5 leading-relaxed" x-text="cameraError"></p>
                 </div>
                 <div class="pt-2 flex flex-col gap-2">
-                    <button 
-                        type="button" 
-                        @click="closeCamera(); document.getElementById('camera-native-input-siswa').click()" 
-                        class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition"
+                    <label 
+                        for="chat-camera-native" 
+                        @click="closeCamera()" 
+                        class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition cursor-pointer text-center block"
                     >
-                        Gunakan Kamera Ponsel
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="closeCamera(); document.getElementById('file-input-siswa').click()" 
-                        class="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-medium transition"
+                        Gunakan Kamera Bawaan Ponsel
+                    </label>
+                    <label 
+                        for="chat-file-input" 
+                        @click="closeCamera()" 
+                        class="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-medium transition cursor-pointer text-center block"
                     >
                         Pilih dari Galeri / Dokumen
-                    </button>
+                    </label>
                 </div>
             </div>
 
@@ -610,9 +562,9 @@
         </div>
 
         <!-- Camera Controls Bottom Bar -->
-        <div class="py-3 flex items-center justify-center gap-6 z-10">
+        <div class="py-3 flex flex-col items-center justify-center gap-3 z-10">
             <!-- Shutter state: when live video is active -->
-            <div x-show="!capturedDataUrl && !cameraError && !cameraLoading" class="flex items-center gap-6">
+            <div x-show="!capturedDataUrl && !cameraError && !cameraLoading" class="flex flex-col items-center gap-3">
                 <button 
                     type="button" 
                     @click="takeSnapshot()" 
@@ -621,6 +573,14 @@
                 >
                     <span class="size-full rounded-full bg-white block"></span>
                 </button>
+                <!-- Quick link for native phone camera -->
+                <label 
+                    for="chat-camera-native" 
+                    @click="closeCamera()" 
+                    class="text-[11px] text-gray-300 hover:text-white underline cursor-pointer"
+                >
+                    Atau buka aplikasi kamera bawaan ponsel
+                </label>
             </div>
 
             <!-- Review state: when photo has been taken -->

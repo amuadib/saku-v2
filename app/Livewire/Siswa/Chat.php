@@ -5,10 +5,15 @@ namespace App\Livewire\Siswa;
 use App\Models\ChatMessage;
 use App\Models\Siswa;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Chat extends Component
 {
+    use WithFileUploads;
+
     public $pesan = '';
+
+    public $attachment = null;
 
     public ?Siswa $siswa = null;
 
@@ -39,26 +44,43 @@ class Chat extends Component
             ]);
     }
 
+    public function cancelAttachment(): void
+    {
+        $this->reset('attachment');
+    }
+
     public function sendMessage(): void
     {
         $clean = trim((string) $this->pesan);
-        if ($clean === '' || ! $this->siswa) {
+        if (($clean === '' && ! $this->attachment) || ! $this->siswa) {
             return;
         }
 
         $this->validate([
-            'pesan' => 'required|string|max:2000',
+            'pesan' => 'nullable|string|max:2000',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
         ]);
 
-        ChatMessage::create([
+        $attachmentData = [];
+        if ($this->attachment) {
+            $path = $this->attachment->store("chat-attachments/{$this->siswa->id}", 'public');
+            $attachmentData = [
+                'attachment_path' => $path,
+                'attachment_name' => $this->attachment->getClientOriginalName(),
+                'attachment_type' => $this->attachment->getMimeType(),
+                'attachment_size' => $this->attachment->getSize(),
+            ];
+        }
+
+        ChatMessage::create(array_merge([
             'siswa_id' => $this->siswa->id,
             'sender_type' => 'siswa',
             'sender_id' => auth()->id(),
-            'pesan' => $clean,
+            'pesan' => $clean !== '' ? $clean : null,
             'is_read' => false,
-        ]);
+        ], $attachmentData));
 
-        $this->reset('pesan');
+        $this->reset(['pesan', 'attachment']);
         $this->dispatch('message-sent');
     }
 

@@ -6,6 +6,8 @@ use App\Models\ChatMessage;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -199,4 +201,112 @@ test('unread chat count for siswa counts unread admin messages', function () {
         ->get(route('siswa.dashboard'))
         ->assertOk()
         ->assertSee('animate-pulse');
+});
+
+test('siswa can send chat with image attachment and optional text', function () {
+    Storage::fake('public');
+
+    $siswa = Siswa::create([
+        'nis' => '12345',
+        'nama' => 'Budi Santoso',
+        'status' => 1,
+        'lembaga_id' => 1,
+        'jenis_kelamin' => 'l',
+    ]);
+
+    $user = User::factory()->create([
+        'role_id' => 5,
+        'authable_type' => Siswa::class,
+        'authable_id' => $siswa->id,
+    ]);
+
+    $file = UploadedFile::fake()->image('bukti_transfer.jpg', 600, 400);
+
+    Livewire::actingAs($user)
+        ->test(Chat::class)
+        ->set('attachment', $file)
+        ->set('pesan', 'Ini bukti pembayaran saya')
+        ->call('sendMessage')
+        ->assertDispatched('message-sent')
+        ->assertSet('attachment', null)
+        ->assertSet('pesan', '');
+
+    $msg = ChatMessage::where('siswa_id', $siswa->id)->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->pesan)->toBe('Ini bukti pembayaran saya');
+    expect($msg->attachment_path)->not->toBeNull();
+    expect($msg->attachment_name)->toBe('bukti_transfer.jpg');
+    expect($msg->isImage())->toBeTrue();
+    expect($msg->isPdf())->toBeFalse();
+
+    Storage::disk('public')->assertExists($msg->attachment_path);
+});
+
+test('siswa can send chat with pdf attachment without message text', function () {
+    Storage::fake('public');
+
+    $siswa = Siswa::create([
+        'nis' => '12345',
+        'nama' => 'Budi Santoso',
+        'status' => 1,
+        'lembaga_id' => 1,
+        'jenis_kelamin' => 'l',
+    ]);
+
+    $user = User::factory()->create([
+        'role_id' => 5,
+        'authable_type' => Siswa::class,
+        'authable_id' => $siswa->id,
+    ]);
+
+    $file = UploadedFile::fake()->create('formulir.pdf', 500, 'application/pdf');
+
+    Livewire::actingAs($user)
+        ->test(Chat::class)
+        ->set('attachment', $file)
+        ->call('sendMessage')
+        ->assertDispatched('message-sent');
+
+    $msg = ChatMessage::where('siswa_id', $siswa->id)->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->pesan)->toBeNull();
+    expect($msg->attachment_name)->toBe('formulir.pdf');
+    expect($msg->isPdf())->toBeTrue();
+    expect($msg->isImage())->toBeFalse();
+
+    Storage::disk('public')->assertExists($msg->attachment_path);
+});
+
+test('admin can reply with attachment', function () {
+    Storage::fake('public');
+
+    $siswa = Siswa::create([
+        'nis' => '12345',
+        'nama' => 'Budi Santoso',
+        'status' => 1,
+        'lembaga_id' => 1,
+        'jenis_kelamin' => 'l',
+    ]);
+
+    $adminUser = User::factory()->create([
+        'role_id' => 1,
+    ]);
+
+    $file = UploadedFile::fake()->create('kwitansi.pdf', 300, 'application/pdf');
+
+    Livewire::actingAs($adminUser)
+        ->test(ChatIndex::class)
+        ->call('selectSiswa', $siswa->id)
+        ->set('attachment', $file)
+        ->set('pesan', 'Berikut kwitansinya')
+        ->call('sendMessage')
+        ->assertDispatched('message-sent');
+
+    $reply = ChatMessage::where('siswa_id', $siswa->id)->where('sender_type', 'admin')->first();
+    expect($reply)->not->toBeNull();
+    expect($reply->pesan)->toBe('Berikut kwitansinya');
+    expect($reply->attachment_name)->toBe('kwitansi.pdf');
+    expect($reply->isPdf())->toBeTrue();
+
+    Storage::disk('public')->assertExists($reply->attachment_path);
 });

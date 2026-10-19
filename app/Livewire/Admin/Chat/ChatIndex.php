@@ -5,12 +5,17 @@ namespace App\Livewire\Admin\Chat;
 use App\Models\ChatMessage;
 use App\Models\Siswa;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class ChatIndex extends Component
 {
+    use WithFileUploads;
+
     public ?string $selectedSiswaId = null;
 
     public string $pesan = '';
+
+    public $attachment = null;
 
     public string $search = '';
 
@@ -53,26 +58,43 @@ class ChatIndex extends Component
             ]);
     }
 
+    public function cancelAttachment(): void
+    {
+        $this->reset('attachment');
+    }
+
     public function sendMessage(): void
     {
         $clean = trim((string) $this->pesan);
-        if ($clean === '' || ! $this->selectedSiswaId) {
+        if (($clean === '' && ! $this->attachment) || ! $this->selectedSiswaId) {
             return;
         }
 
         $this->validate([
-            'pesan' => 'required|string|max:2000',
+            'pesan' => 'nullable|string|max:2000',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
         ]);
 
-        ChatMessage::create([
+        $attachmentData = [];
+        if ($this->attachment) {
+            $path = $this->attachment->store("chat-attachments/{$this->selectedSiswaId}", 'public');
+            $attachmentData = [
+                'attachment_path' => $path,
+                'attachment_name' => $this->attachment->getClientOriginalName(),
+                'attachment_type' => $this->attachment->getMimeType(),
+                'attachment_size' => $this->attachment->getSize(),
+            ];
+        }
+
+        ChatMessage::create(array_merge([
             'siswa_id' => $this->selectedSiswaId,
             'sender_type' => 'admin',
             'sender_id' => auth()->id(),
-            'pesan' => $clean,
+            'pesan' => $clean !== '' ? $clean : null,
             'is_read' => false,
-        ]);
+        ], $attachmentData));
 
-        $this->reset('pesan');
+        $this->reset(['pesan', 'attachment']);
         $this->dispatch('message-sent');
     }
 

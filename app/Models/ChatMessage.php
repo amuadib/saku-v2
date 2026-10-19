@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class ChatMessage extends Model
 {
@@ -17,6 +18,10 @@ class ChatMessage extends Model
         'sender_type',
         'sender_id',
         'pesan',
+        'attachment_path',
+        'attachment_name',
+        'attachment_type',
+        'attachment_size',
         'is_read',
         'read_at',
     ];
@@ -24,6 +29,7 @@ class ChatMessage extends Model
     protected $casts = [
         'is_read' => 'boolean',
         'read_at' => 'datetime',
+        'attachment_size' => 'integer',
     ];
 
     public function siswa(): BelongsTo
@@ -69,5 +75,61 @@ class ChatMessage extends Model
         }
 
         return $query->count();
+    }
+
+    public function hasAttachment(): bool
+    {
+        return ! empty($this->attachment_path);
+    }
+
+    public function isImage(): bool
+    {
+        if (! $this->hasAttachment()) {
+            return false;
+        }
+
+        if ($this->attachment_type && str_starts_with($this->attachment_type, 'image/')) {
+            return true;
+        }
+
+        $extension = strtolower(pathinfo($this->attachment_path, PATHINFO_EXTENSION));
+
+        return in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
+    }
+
+    public function isPdf(): bool
+    {
+        if (! $this->hasAttachment()) {
+            return false;
+        }
+
+        if ($this->attachment_type === 'application/pdf') {
+            return true;
+        }
+
+        return strtolower(pathinfo($this->attachment_path, PATHINFO_EXTENSION)) === 'pdf';
+    }
+
+    public function getAttachmentUrlAttribute(): ?string
+    {
+        if (! $this->attachment_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->attachment_path);
+    }
+
+    public function getFormattedAttachmentSizeAttribute(): string
+    {
+        if (! $this->attachment_size) {
+            return '';
+        }
+
+        $bytes = (int) $this->attachment_size;
+        if ($bytes >= 1048576) {
+            return number_format($bytes / 1048576, 1).' MB';
+        }
+
+        return number_format($bytes / 1024, 0).' KB';
     }
 }

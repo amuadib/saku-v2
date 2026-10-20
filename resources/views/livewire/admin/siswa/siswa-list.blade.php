@@ -114,6 +114,7 @@
                 <div class="mb-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex flex-wrap gap-2">
                         <flux:button size="sm" color="blue" icon="paper-airplane" wire:click="kirimTagihan" wire:confirm="Kirim tagihan ke siswa yang dipilih?">Kirim tagihan</flux:button>
+                        <flux:button size="sm" color="orange" icon="user-plus" wire:click="kirimMagicLink" wire:confirm="Kirim magic link ke siswa yang dipilih?">Kirim Magic Link</flux:button>
                         <flux:modal.trigger name="export-modal">
                             <flux:button size="sm" color="green" icon="document-arrow-down">Ekspor</flux:button>
                         </flux:modal.trigger>

@@ -170,7 +170,54 @@ class SiswaList extends Component
         \Flux::toast('Magic link berhasil di-regenerate. Link lama otomatis tidak berlaku lagi.', variant: 'success');
     }
 
-    // Penjualan Modal Methods removed (extracted to SiswaPenjualanModal)
+    public function kirimMagicLink()
+    {
+        if (empty($this->selected) && ! $this->selectAll) {
+            return;
+        }
+
+        $query = $this->getSiswaQuery();
+
+        if (! $this->selectAll) {
+            $query->whereIn('id', $this->selected);
+        }
+
+        $records = $query->get();
+
+        $pesan = [];
+        foreach ($records as $s) {
+            if (empty($s->telepon)) {
+                continue;
+            }
+            $nomor = env('APP_ENV') == 'local' ? config('whatsapp.WHATSAPP_TEST_NUMBER') : ''.$s->telepon;
+            $pesan[] = [
+                'name' => $s->nama,
+                'number' => $nomor,
+                'message' => WhatsappService::prosesPesan(
+                    siswa: $s,
+                    data: [],
+                    jenis: 'link.resend'
+                ),
+                'sessionId' => WhatsappService::getSessionId($s),
+            ];
+        }
+        if (count($pesan) > 0) {
+            $response = WhatsappService::kirimWa(
+                kumpulan_pesan: $pesan
+            );
+
+            if ($response['status'] == 'success') {
+                session()->flash('message', 'Magic link untuk siswa terpilih telah dikirimkan');
+            } else {
+                Log::error('Gagal mengirim pesan. Response: '.json_encode($response));
+                session()->flash('error', 'Gagal mengirim pesan. '.$response['message']);
+            }
+        } else {
+            session()->flash('error', 'Data siswa terpilih tidak memiliki nomor telepon');
+        }
+
+        $this->deselectAll();
+    }
 
     public function kirimTagihan()
     {

@@ -34,6 +34,14 @@ class WhatsappService
         $tabungan = '';
         $t3 = $template['akhir'];
 
+        $magic_link = PHP_EOL.'Klik link berikut untuk login ke Aplikasi Siswa: '.$siswa->auth->getMagicLoginUrl().PHP_EOL;
+
+        if ($jenis == 'link.resend') {
+            return $test_message.
+                'Link login siswa telah diperbarui.'.PHP_EOL.
+                $magic_link;
+        }
+
         $awal = WhatsappService::prosesTemplate(
             [
                 'siswa.nama' => $siswa->nama,
@@ -86,7 +94,6 @@ class WhatsappService
         );
 
         $nb = $template['nb'] ?? '';
-        $magic_link = PHP_EOL.'Klik link berikut untuk login ke Aplikasi Siswa: '.$siswa->auth->getMagicLoginUrl().PHP_EOL;
 
         return $test_message.$awal.$isi.$tabungan.$akhir.$nb.$magic_link.$template['footer'];
     }

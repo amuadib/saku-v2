@@ -49,55 +49,49 @@
                     </div>
                 @endif
 
-                <flux:sidebar.group :heading="__('Platform')" class="grid mt-2">
+                <flux:sidebar.group :heading="__('Utama')" class="grid mt-2">
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.group :heading="__('Manajemen')" class="grid mt-4">
-                    @can('viewAny', \App\Models\Siswa::class)
-                        <flux:sidebar.item icon="users" :href="route('admin.siswa.index')" :current="request()->routeIs('admin.siswa.*')" wire:navigate>{{ __('Siswa') }}</flux:sidebar.item>
-                    @endcan
-
-                    @can('viewAny', \App\Models\Kelas::class)
-                        <flux:sidebar.item icon="building-library" :href="route('admin.kelas.index')" :current="request()->routeIs('admin.kelas.*')" wire:navigate>{{ __('Kelas') }}</flux:sidebar.item>
-                    @endcan
-                    @can('viewAny', \App\Models\Periode::class)
-                        <flux:sidebar.item icon="calendar" :href="route('admin.periode.index')" :current="request()->routeIs('admin.periode.*')" wire:navigate>{{ __('Periode') }}</flux:sidebar.item>
-                    @endcan
-                    @can('viewAny', \App\Models\User::class)
-                        <flux:sidebar.item icon="user-group" :href="route('admin.user.index')" :current="request()->routeIs('admin.user.*')" wire:navigate>{{ __('Pengguna') }}</flux:sidebar.item>
-                    @endcan
-                    
-                    @if(auth()->user()->isAdmin())
-                        <flux:sidebar.item icon="cog" :href="route('admin.pengaturan.index')" :current="request()->routeIs('admin.pengaturan.*')" wire:navigate>{{ __('Pengaturan') }}</flux:sidebar.item>
-                        <flux:sidebar.item icon="clock" :href="route('admin.log-aktivitas.index')" :current="request()->routeIs('admin.log-aktivitas.*')" wire:navigate>{{ __('Log Aktivitas') }}</flux:sidebar.item>
-                    @endif
-                </flux:sidebar.group>
-                
                 <flux:sidebar.group :heading="__('Keuangan')" class="grid mt-4">
-                    @can('viewAny', \App\Models\Kas::class)
-                        <flux:sidebar.item icon="wallet" :href="route('admin.kas.index')" :current="request()->routeIs('admin.kas.*')" wire:navigate>{{ __('Kas') }}</flux:sidebar.item>
+                    @can('viewAny', \App\Models\Tagihan::class)
+                        <flux:sidebar.item icon="document-text" :href="route('admin.tagihan.index')" :current="request()->routeIs('admin.tagihan.*')" wire:navigate>{{ __('Tagihan') }}</flux:sidebar.item>
                     @endcan
                     @can('viewAny', \App\Models\Tabungan::class)
                         <flux:sidebar.item icon="banknotes" :href="route('admin.tabungan.index')" :current="request()->routeIs('admin.tabungan.*')" wire:navigate>{{ __('Tabungan') }}</flux:sidebar.item>
                     @endcan
-                    @can('viewAny', \App\Models\Tagihan::class)
-                        <flux:sidebar.item icon="document-text" :href="route('admin.tagihan.index')" :current="request()->routeIs('admin.tagihan.*')" wire:navigate>{{ __('Tagihan') }}</flux:sidebar.item>
+                    @can('viewAny', \App\Models\Kas::class)
+                        <flux:sidebar.item icon="wallet" :href="route('admin.kas.index')" :current="request()->routeIs('admin.kas.*')" wire:navigate>{{ __('Kas') }}</flux:sidebar.item>
                     @endcan
-                    <flux:sidebar.item icon="shopping-cart" :href="route('admin.penjualan.index')" :current="request()->routeIs('admin.penjualan.*')" wire:navigate>{{ __('Penjualan') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="shopping-bag" :href="route('admin.pembelian.index')" :current="request()->routeIs('admin.pembelian.*')" wire:navigate>{{ __('Pembelian') }}</flux:sidebar.item>
                     <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.transaksi.index')" :current="request()->routeIs('admin.transaksi.*')" wire:navigate>{{ __('Transaksi') }}</flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.group :heading="__('Inventaris & Lainnya')" class="grid mt-4">
+                <flux:sidebar.group :heading="__('Koperasi & Logistik')" class="grid mt-4">
+                    <flux:sidebar.item icon="shopping-cart" :href="route('admin.penjualan.index')" :current="request()->routeIs('admin.penjualan.*')" wire:navigate>{{ __('Penjualan') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="shopping-bag" :href="route('admin.pembelian.index')" :current="request()->routeIs('admin.pembelian.*')" wire:navigate>{{ __('Pembelian') }}</flux:sidebar.item>
                     @can('viewAny', \App\Models\Barang::class)
                         <flux:sidebar.item icon="cube" :href="route('admin.barang.index')" :current="request()->routeIs('admin.barang.*')" wire:navigate>{{ __('Barang') }}</flux:sidebar.item>
                     @endcan
                     @can('viewAny', \App\Models\Supplier::class)
                         <flux:sidebar.item icon="truck" :href="route('admin.supplier.index')" :current="request()->routeIs('admin.supplier.*')" wire:navigate>{{ __('Supplier') }}</flux:sidebar.item>
                     @endcan
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Akademik & Kesiswaan')" class="grid mt-4">
+                    @can('viewAny', \App\Models\Siswa::class)
+                        <flux:sidebar.item icon="users" :href="route('admin.siswa.index')" :current="request()->routeIs('admin.siswa.*')" wire:navigate>{{ __('Siswa') }}</flux:sidebar.item>
+                    @endcan
+                    @can('viewAny', \App\Models\Kelas::class)
+                        <flux:sidebar.item icon="building-library" :href="route('admin.kelas.index')" :current="request()->routeIs('admin.kelas.*')" wire:navigate>{{ __('Kelas') }}</flux:sidebar.item>
+                    @endcan
+                    @can('viewAny', \App\Models\Periode::class)
+                        <flux:sidebar.item icon="calendar" :href="route('admin.periode.index')" :current="request()->routeIs('admin.periode.*')" wire:navigate>{{ __('Periode') }}</flux:sidebar.item>
+                    @endcan
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Layanan & Komunikasi')" class="grid mt-4">
                     <flux:sidebar.item 
                         icon="chat-bubble-oval-left-ellipsis" 
                         :href="route('admin.chat.index')" 
@@ -108,11 +102,23 @@
                         :icon-dot="$unreadChatCount > 0"
                         wire:navigate
                     >{{ __('Chat Siswa') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('admin.pengaduan.index')" :current="request()->routeIs('admin.pengaduan.*')" wire:navigate>{{ __('Pengaduan') }}</flux:sidebar.item>
                     @can('viewAny', \App\Models\Informasi::class)
                         <flux:sidebar.item icon="newspaper" :href="route('admin.informasi.index')" :current="request()->routeIs('admin.informasi.*')" wire:navigate>{{ __('Informasi') }}</flux:sidebar.item>
                     @endcan
+                    {{-- <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('admin.pengaduan.index')" :current="request()->routeIs('admin.pengaduan.*')" wire:navigate>{{ __('Pengaduan') }}</flux:sidebar.item> --}}
                 </flux:sidebar.group>
+
+                @if(auth()->user()->isAdmin() || auth()->user()->can('viewAny', \App\Models\User::class))
+                    <flux:sidebar.group :heading="__('Sistem & Pengaturan')" class="grid mt-4">
+                        @can('viewAny', \App\Models\User::class)
+                            <flux:sidebar.item icon="user-group" :href="route('admin.user.index')" :current="request()->routeIs('admin.user.*')" wire:navigate>{{ __('Pengguna') }}</flux:sidebar.item>
+                        @endcan
+                        @if(auth()->user()->isAdmin())
+                            <flux:sidebar.item icon="cog" :href="route('admin.pengaturan.index')" :current="request()->routeIs('admin.pengaturan.*')" wire:navigate>{{ __('Pengaturan') }}</flux:sidebar.item>
+                            <flux:sidebar.item icon="clock" :href="route('admin.log-aktivitas.index')" :current="request()->routeIs('admin.log-aktivitas.*')" wire:navigate>{{ __('Log Aktivitas') }}</flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
             </flux:sidebar.nav>
 
             <flux:spacer />

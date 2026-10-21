@@ -95,7 +95,19 @@ class SettingForm extends Component
         $apiUrl = rtrim($baseUrl, '/').'/api/lembaga/sync';
 
         try {
-            $request = Http::withToken($token)->timeout(30);
+            $request = Http::withToken($token)
+                ->timeout(30)
+                ->connectTimeout(15)
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                    ],
+                ])
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 SakuApp/2.0',
+                    'Accept' => 'application/json',
+                ]);
+
             if (app()->environment('local')) {
                 $request->withoutVerifying();
             }

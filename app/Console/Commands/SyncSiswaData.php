@@ -29,7 +29,18 @@ class SyncSiswaData extends Command
             $apiUrl = config('custom.api_akademik.url').'/api/siswa/sync';
             $apiKey = config('custom.api_akademik.token');
 
-            $request = Http::withToken($apiKey)->timeout(30);
+            $request = Http::withToken($apiKey)
+                ->timeout(60)
+                ->connectTimeout(15)
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                    ],
+                ])
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 SakuApp/2.0',
+                    'Accept' => 'application/json',
+                ]);
 
             if (app()->environment('local')) {
                 $request->withoutVerifying();

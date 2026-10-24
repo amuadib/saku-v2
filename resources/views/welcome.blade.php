@@ -63,8 +63,8 @@
             </div>
             
             <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
-                Kelola Keuangan Lembaga <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-400">Lebih Cerdas & Akurat</span>
+                Pengelolaan Keuangan Lembaga <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-400">Yang Cerdas & Akurat</span>
             </h1>
             
             <p class="max-w-2xl mx-auto text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed">

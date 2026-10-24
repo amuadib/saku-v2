@@ -99,9 +99,7 @@ class SettingForm extends Component
                 ->timeout(30)
                 ->connectTimeout(15)
                 ->withOptions([
-                    'curl' => [
-                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-                    ],
+                    'force_ip_resolve' => 'v4',
                 ])
                 ->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 SakuApp/2.0',
@@ -232,8 +230,11 @@ class SettingForm extends Component
 
             Flux::toast('Berhasil menyinkronkan data lembaga dari API Master');
         } catch (\Exception $e) {
-            Log::error('Sinkronisasi lembaga gagal: '.$e->getMessage());
-            Flux::toast('Terjadi kesalahan saat sinkronisasi: '.$e->getMessage(), variant: 'danger');
+            $host = parse_url($apiUrl, PHP_URL_HOST);
+            $dns = @gethostbynamel($host);
+            $dnsStr = $dns ? implode(', ', $dns) : 'Gagal resolve DNS';
+            Log::error("Sinkronisasi lembaga gagal [Host: {$host}, IP: {$dnsStr}]: ".$e->getMessage());
+            Flux::toast('Terjadi kesalahan saat sinkronisasi: '.$e->getMessage()." [Resolved IP: {$dnsStr}]", variant: 'danger');
         }
     }
 

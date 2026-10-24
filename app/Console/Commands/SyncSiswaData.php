@@ -33,9 +33,7 @@ class SyncSiswaData extends Command
                 ->timeout(60)
                 ->connectTimeout(15)
                 ->withOptions([
-                    'curl' => [
-                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-                    ],
+                    'force_ip_resolve' => 'v4',
                 ])
                 ->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 SakuApp/2.0',

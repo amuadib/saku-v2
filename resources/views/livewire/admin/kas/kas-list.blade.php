@@ -44,7 +44,12 @@
                             <flux:table.cell>{{ $kas->nama }}</flux:table.cell>
                             <flux:table.cell>{{ config('custom.lembaga.'.$kas->lembaga_id.'.nama') }}</flux:table.cell>
                             <flux:table.cell>{{ Str::limit($kas->keterangan, 50) }}</flux:table.cell>
-                            <flux:table.cell>Rp {{ number_format($kas->saldo, 0, ',', '.') }}</flux:table.cell>
+                            <flux:table.cell>
+                                Rp {{ number_format($kas->saldo, 0, ',', '.') }}
+                                @if($kas->setoran && $kas->saldo > 0)
+                                    <flux:button size="xs" wire:click="setorDana('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menyetor dana ini? Saldo kas akan di-reset menjadi 0." icon="banknotes" color="green"></flux:button>
+                                @endif
+                            </flux:table.cell>
                             <flux:table.cell>
                                 @if($kas->ada_tagihan)
                                     <flux:badge color="green">Ya</flux:badge>
@@ -74,9 +79,6 @@
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
-                                @if($kas->setoran)
-                                    <flux:button size="sm" wire:click="setorDana('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menyetor dana ini? Saldo kas akan di-reset menjadi 0." icon="banknotes" color="green"></flux:button>
-                                @endif
                                 <flux:button size="sm" href="{{ route('admin.kas.edit', $kas->id) }}" wire:navigate icon="pencil" color="yellow"></flux:button>
                                 <flux:button size="sm" variant="danger" wire:click="delete('{{ $kas->id }}')" wire:confirm="Apakah Anda yakin ingin menghapus kas ini?" icon="trash"></flux:button>
                             </flux:table.cell>

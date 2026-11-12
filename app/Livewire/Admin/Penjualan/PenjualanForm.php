@@ -3,34 +3,42 @@
 namespace App\Livewire\Admin\Penjualan;
 
 use App\Models\Barang;
+use App\Models\DetailPenjualan;
 use App\Models\Kas;
+use App\Models\Kelas;
 use App\Models\Penjualan;
 use App\Models\Siswa;
 use App\Models\Tabungan;
-use App\Models\Tagihan;
 use App\Models\Transaksi;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class PenjualanForm extends Component
 {
     public ?Penjualan $penjualan = null;
 
-    public $kode = '';
+    public string $kode = '';
 
-    public $siswa_id = '';
+    public string $siswa_id = '';
 
-    public $pembayaran = 'tun'; // tun, tab, tag
+    public string $pembayaran = 'tun'; // tun, tab, tag
 
-    // Array of detail items
-    // format: [['barang_id' => '', 'jumlah' => 1, 'harga' => 0, 'total' => 0]]
-    public $items = [];
+    /**
+     * Array of detail items.
+     *
+     * @var array<int, array{id?: string|null, barang_id: string, jumlah: int|string, harga: int|float|string, total: int|float}>
+     */
+    public array $items = [];
 
-    // Summary
-    public $total_transaksi = 0;
+    public int|float $total_transaksi = 0;
 
-    protected function rules()
+    /**
+     * @return array<string, string>
+     */
+    protected function rules(): array
     {
         return [
             'kode' => 'required|string|max:20',
@@ -43,19 +51,37 @@ class PenjualanForm extends Component
         ];
     }
 
-    public function mount(?Penjualan $penjualan = null)
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'kode.required' => 'Kode penjualan wajib diisi.',
+            'siswa_id.required' => 'Siswa pembeli wajib dipilih.',
+            'siswa_id.exists' => 'Siswa pembeli tidak valid.',
+            'pembayaran.required' => 'Metode pembayaran wajib dipilih.',
+            'items.required' => 'Minimal pilih 1 barang.',
+            'items.min' => 'Minimal pilih 1 barang.',
+            'items.*.barang_id.required' => 'Barang wajib dipilih.',
+            'items.*.jumlah.min' => 'Jumlah minimal 1.',
+            'items.*.harga.min' => 'Harga tidak boleh negatif.',
+        ];
+    }
+
+    public function mount(?Penjualan $penjualan = null): void
     {
         if ($penjualan && $penjualan->exists) {
             $this->penjualan = $penjualan;
-            $this->kode = $penjualan->kode ?? '';
-            $this->siswa_id = $penjualan->siswa_id;
-            $this->pembayaran = $penjualan->pembayaran;
+            $this->kode = (string) ($penjualan->kode ?? '');
+            $this->siswa_id = (string) $penjualan->siswa_id;
+            $this->pembayaran = (string) ($penjualan->pembayaran ?? 'tun');
 
-            foreach ($penjualan->detail as $detail) {
+            foreach (DetailPenjualan::where('penjualan_id', $penjualan->id)->get() as $detail) {
                 $this->items[] = [
                     'id' => $detail->id,
-                    'barang_id' => $detail->barang_id,
-                    'jumlah' => $detail->jumlah,
+                    'barang_id' => (string) $detail->barang_id,
+                    'jumlah' => (int) $detail->jumlah,
                     'harga' => (int) $detail->harga,
                     'total' => (int) $detail->total,
                 ];
@@ -67,7 +93,7 @@ class PenjualanForm extends Component
         }
     }
 
-    public function addItem()
+    public function addItem(): void
     {
         $this->items[] = [
             'id' => null,
@@ -78,14 +104,14 @@ class PenjualanForm extends Component
         ];
     }
 
-    public function removeItem($index)
+    public function removeItem(int $index): void
     {
         unset($this->items[$index]);
         $this->items = array_values($this->items);
         $this->calculateTotal();
     }
 
-    public function updated($property, $value)
+    public function updated(string $property, mixed $value): void
     {
         if (Str::startsWith($property, 'items.')) {
             $parts = explode('.', $property);
@@ -93,8 +119,12 @@ class PenjualanForm extends Component
                 $index = (int) $parts[1];
                 $field = $parts[2];
 
+                if (! isset($this->items[$index])) {
+                    return;
+                }
+
                 if ($field === 'barang_id') {
-                    $barang = Barang::find($value);
+                    $barang = is_string($value) || is_int($value) ? Barang::whereKey($value)->first() : null;
                     if ($barang) {
                         if ($barang->stok <= 0) {
                             \Flux::toast('Stok barang habis (0).', variant: 'danger');
@@ -112,30 +142,28 @@ class PenjualanForm extends Component
                             }
                         }
 
-                        if ($existingIndex !== null) {
-                            // Increment existing
-                            $newQty = (int) ($this->items[$existingIndex]['jumlah'] ?? 0) + 1;
+                        if ($existingIndex !== null && isset($this->items[$existingIndex])) {
+                            $existingItem = $this->items[$existingIndex];
+                            $newQty = (int) $existingItem['jumlah'] + 1;
                             if ($newQty > $barang->stok) {
                                 \Flux::toast('Jumlah melebihi stok yang tersedia.', variant: 'danger');
                             } else {
-                                $this->items[$existingIndex]['jumlah'] = $newQty;
-                                $price = (int) ($this->items[$existingIndex]['harga'] ?? 0);
-                                $this->items[$existingIndex]['total'] = $newQty * $price;
+                                $price = (int) $existingItem['harga'];
+                                $existingItem['jumlah'] = $newQty;
+                                $existingItem['total'] = $newQty * $price;
+                                $this->items[$existingIndex] = $existingItem;
                                 \Flux::toast('Barang sudah ada di daftar. Jumlah ditambahkan.', variant: 'success');
                             }
 
-                            // Reset current row so user can pick another
                             $this->items[$index]['barang_id'] = '';
                             $this->calculateTotal();
 
                             return;
                         }
 
-                        // Not in list, add it
-                        $this->items[$index]['harga'] = $barang->harga ?? 0;
+                        $this->items[$index]['harga'] = (int) $barang->harga;
                         $this->items[$index]['jumlah'] = 1;
 
-                        // Automatically add new row if selecting item on the last row
                         if ($index === count($this->items) - 1) {
                             $this->addItem();
                         }
@@ -143,11 +171,11 @@ class PenjualanForm extends Component
                 }
 
                 if ($field === 'jumlah') {
-                    $barangId = $this->items[$index]['barang_id'] ?? null;
-                    if ($barangId) {
-                        $barang = Barang::find($barangId);
+                    $barangId = $this->items[$index]['barang_id'];
+                    if ($barangId !== '') {
+                        $barang = Barang::whereKey($barangId)->first();
                         if ($barang) {
-                            $qty = (int) $value;
+                            $qty = is_numeric($value) ? (int) $value : 1;
                             if ($qty > $barang->stok) {
                                 \Flux::toast('Jumlah melebihi stok yang tersedia ('.$barang->stok.').', variant: 'danger');
                                 $this->items[$index]['jumlah'] = $barang->stok;
@@ -158,9 +186,8 @@ class PenjualanForm extends Component
                     }
                 }
 
-                // Recalculate row total
-                $qty = (int) ($this->items[$index]['jumlah'] ?? 0);
-                $price = (int) ($this->items[$index]['harga'] ?? 0);
+                $qty = (int) $this->items[$index]['jumlah'];
+                $price = (int) $this->items[$index]['harga'];
                 $this->items[$index]['total'] = $qty * $price;
 
                 $this->calculateTotal();
@@ -168,32 +195,100 @@ class PenjualanForm extends Component
         }
     }
 
-    public function updatedSiswaId($value)
+    public function updatedSiswaId(mixed $value): void
     {
-        // Reset items when siswa changes so they don't keep invalid barang_ids
         $this->items = [];
         $this->addItem();
         $this->calculateTotal();
     }
 
-    public function calculateTotal()
+    public function calculateTotal(): void
     {
         $this->total_transaksi = collect($this->items)->sum('total');
     }
 
-    public function save()
+    /**
+     * Single-roundtrip submission from the desktop-like client POS UI.
+     *
+     * @param  array{kode?: string, siswa_id?: string, pembayaran?: string, items?: array<int, array<string, mixed>>}  $payload
+     * @return array{ok: bool, errors: array<string, array<int, string>>}|null
+     */
+    public function saveTransaction(array $payload = []): mixed
     {
-        // Filter out empty items
-        $this->items = array_filter($this->items, function ($item) {
+        if ($this->penjualan && $this->penjualan->exists) {
+            return ['ok' => false, 'errors' => ['general' => ['Transaksi yang sudah tersimpan tidak dapat diubah.']]];
+        }
+
+        $this->kode = trim((string) ($payload['kode'] ?? $this->kode));
+        $this->siswa_id = (string) ($payload['siswa_id'] ?? $this->siswa_id);
+        $this->pembayaran = (string) ($payload['pembayaran'] ?? $this->pembayaran);
+
+        $rawItems = $payload['items'] ?? $this->items;
+        $this->items = collect($rawItems)
+            ->filter(fn (array $item): bool => ! empty($item['barang_id']))
+            ->map(function (array $item): array {
+                $qty = is_numeric($item['jumlah'] ?? null) ? (int) $item['jumlah'] : 0;
+                $harga = is_numeric($item['harga'] ?? null) ? (int) $item['harga'] : 0;
+
+                return [
+                    'id' => isset($item['id']) ? (string) $item['id'] : null,
+                    'barang_id' => (string) $item['barang_id'],
+                    'jumlah' => $qty,
+                    'harga' => $harga,
+                    'total' => $qty * $harga,
+                ];
+            })
+            ->values()
+            ->all();
+
+        $this->calculateTotal();
+        $this->resetErrorBag();
+
+        try {
+            if (! $this->persistPenjualan()) {
+                return [
+                    'ok' => false,
+                    'errors' => $this->getErrorBag()->toArray(),
+                ];
+            }
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return [
+                'ok' => false,
+                'errors' => $e->validator->errors()->toArray(),
+            ];
+        }
+
+        return $this->redirect(route('admin.penjualan.index'), navigate: true);
+    }
+
+    public function save(): mixed
+    {
+        if (! $this->persistPenjualan()) {
+            return null;
+        }
+
+        return $this->redirect(route('admin.penjualan.index'), navigate: true);
+    }
+
+    protected function persistPenjualan(): bool
+    {
+        $this->items = array_values(array_filter($this->items, function ($item) {
             return ! empty($item['barang_id']);
-        });
+        }));
 
-        // Re-index array after filtering
-        $this->items = array_values($this->items);
+        foreach ($this->items as $index => $item) {
+            $qty = (int) $item['jumlah'];
+            $harga = (int) $item['harga'];
+            $this->items[$index]['jumlah'] = $qty;
+            $this->items[$index]['harga'] = $harga;
+            $this->items[$index]['total'] = $qty * $harga;
+        }
 
+        $this->calculateTotal();
         $this->validate();
 
-        // Tabungan check before proceeding
         $tabunganDipilih = null;
         if ($this->pembayaran === 'tab') {
             $tabunganDipilih = Tabungan::where('siswa_id', $this->siswa_id)
@@ -204,15 +299,16 @@ class PenjualanForm extends Component
                 $this->addError('pembayaran', 'Saldo tabungan tidak mencukupi untuk total belanja.');
                 \Flux::toast('Saldo tabungan siswa tidak mencukupi.', variant: 'danger');
 
-                return;
+                return false;
             }
         }
 
         $kasPenjualan = Kas::where('penjualan', true)->first();
         if (! $kasPenjualan && in_array($this->pembayaran, ['tun', 'tab'])) {
+            $this->addError('pembayaran', 'Kas Penjualan belum diatur di sistem.');
             \Flux::toast('Kas Penjualan belum diatur di sistem.', variant: 'danger');
 
-            return;
+            return false;
         }
 
         $penjualanData = [
@@ -224,14 +320,8 @@ class PenjualanForm extends Component
         ];
 
         if ($this->penjualan && $this->penjualan->exists) {
-            // Note: Updating existing penjualan with new payments is complex (reversing old tabungan/kas changes).
-            // Usually we don't allow changing payment method or total after it's saved, or we reverse it first.
-            // For now, we will just update the data (which might cause inconsistencies if they changed payment).
-            // It's better to prevent editing of saved transactions completely, or just reverse them.
-            // But if we must:
             $this->penjualan->update($penjualanData);
 
-            // Re-sync details
             $this->penjualan->detail()->delete();
             foreach ($this->items as $item) {
                 $this->penjualan->detail()->create([
@@ -245,7 +335,35 @@ class PenjualanForm extends Component
             session()->flash('message', 'Penjualan berhasil diperbarui.');
         } else {
             DB::transaction(function () use ($penjualanData, $tabunganDipilih, $kasPenjualan) {
+                // Aggregate requested quantities per barang_id to validate stock accurately.
+                $requestedByBarang = [];
+                foreach ($this->items as $item) {
+                    $barangId = (string) $item['barang_id'];
+                    $requestedByBarang[$barangId] = ($requestedByBarang[$barangId] ?? 0) + (int) $item['jumlah'];
+                }
+
+                $lockedBarangs = Barang::whereIn('id', array_keys($requestedByBarang))
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($requestedByBarang as $barangId => $requestedQty) {
+                    $barang = $lockedBarangs->get($barangId);
+                    if (! $barang) {
+                        throw ValidationException::withMessages([
+                            'items' => 'Barang tidak ditemukan.',
+                        ]);
+                    }
+
+                    if ($barang->stok < $requestedQty) {
+                        throw ValidationException::withMessages([
+                            'items' => "Stok {$barang->nama} tidak mencukupi (tersedia: {$barang->stok}, diminta: {$requestedQty}).",
+                        ]);
+                    }
+                }
+
                 $penjualan = Penjualan::create($penjualanData);
+
                 foreach ($this->items as $item) {
                     $penjualan->detail()->create([
                         'barang_id' => $item['barang_id'],
@@ -254,14 +372,12 @@ class PenjualanForm extends Component
                         'total' => $item['total'],
                     ]);
 
-                    // Kurangi stok barang
-                    $barang = Barang::find($item['barang_id']);
+                    $barang = $lockedBarangs->get((string) $item['barang_id']);
                     if ($barang) {
-                        $barang->decrement('stok', $item['jumlah']);
+                        $barang->decrement('stok', (int) $item['jumlah']);
                     }
                 }
 
-                // Input penjualan ke Transaksi
                 $keteranganMetode = match ($this->pembayaran) {
                     'tun' => 'Tunai',
                     'tab' => 'Tabungan',
@@ -269,10 +385,13 @@ class PenjualanForm extends Component
                     default => 'Lainnya',
                 };
 
+                $siswaModel = Siswa::find($this->siswa_id);
+                $namaSiswa = $siswaModel ? $siswaModel->nama : '-';
+
                 Transaksi::create([
                     'kode' => 'PB'.strtoupper(Str::random(6)),
                     'jumlah' => $this->total_transaksi,
-                    'keterangan' => 'Penjualan Siswa '.$penjualan->siswa->nama.' (Metode: '.$keteranganMetode.')',
+                    'keterangan' => 'Penjualan Siswa '.$namaSiswa.' (Metode: '.$keteranganMetode.')',
                     'transable_type' => Penjualan::class,
                     'transable_id' => $penjualan->id,
                     'user_id' => auth()->id(),
@@ -285,15 +404,13 @@ class PenjualanForm extends Component
                     $kasPenjualan->increment('saldo', $this->total_transaksi);
                 } elseif ($this->pembayaran === 'tag') {
                     $tagihanKas = $kasPenjualan ?? Kas::first();
-                    Tagihan::create([
+                    $penjualan->tagihan()->create([
                         'kode' => 'TAG'.strtoupper(Str::random(6)),
                         'siswa_id' => $this->siswa_id,
                         'kas_id' => $tagihanKas ? $tagihanKas->id : null,
                         'jumlah' => $this->total_transaksi,
                         'bayar' => 0,
                         'keterangan' => 'Tagihan dari Penjualan '.$penjualan->kode,
-                        'tagihanable_type' => Penjualan::class,
-                        'tagihanable_id' => $penjualan->id,
                         'user_id' => auth()->id(),
                     ]);
                 }
@@ -302,42 +419,62 @@ class PenjualanForm extends Component
             session()->flash('message', 'Penjualan berhasil ditambahkan.');
         }
 
-        return $this->redirect(route('admin.penjualan.index'), navigate: true);
+        return true;
     }
 
-    public function render()
+    public function render(): View
     {
         $lembagaId = null;
         if (! auth()->user()->isAdmin()) {
             $lembagaId = auth()->user()->authable->lembaga_id ?? null;
         }
 
-        $siswas = Siswa::select('id', 'nama', 'nis', 'lembaga_id')
+        $siswas = Siswa::select('id', 'nama', 'nis', 'lembaga_id', 'kelas_id')
+            ->with('kelas:id,nama')
+            ->withMax('tabungan', 'saldo')
             ->when($lembagaId, function ($q) use ($lembagaId) {
                 $q->where('lembaga_id', $lembagaId);
             })
             ->orderBy('nama')
             ->get();
 
-        // Ensure Barang only belongs to the selected Siswa's lembaga (if a siswa is selected)
-        // Otherwise, filter by the user's lembaga if not admin.
-        $barangLembagaId = $lembagaId;
-        if ($this->siswa_id) {
-            $selectedSiswa = $siswas->firstWhere('id', $this->siswa_id);
-            if ($selectedSiswa) {
-                $barangLembagaId = $selectedSiswa->lembaga_id;
-            }
-        }
-
-        $barangs = Barang::when($barangLembagaId, function ($q) use ($barangLembagaId) {
-            $q->where('lembaga_id', $barangLembagaId);
-        })
+        $barangs = Barang::select('id', 'kode', 'nama', 'harga', 'stok', 'satuan', 'lembaga_id')
+            ->when($lembagaId, function ($q) use ($lembagaId) {
+                $q->where('lembaga_id', $lembagaId);
+            })
             ->orderBy('nama')
             ->get();
+
+        $siswasData = $siswas->map(function (Siswa $siswa): array {
+            $kelas = $siswa->kelas;
+            $kelasNama = $kelas instanceof Kelas ? $kelas->nama : '';
+
+            return [
+                'id' => (string) $siswa->id,
+                'nama' => (string) $siswa->nama,
+                'nis' => (string) ($siswa->nis ?? '-'),
+                'kelas' => (string) $kelasNama,
+                'lembaga_id' => $siswa->lembaga_id,
+                'tabungan_saldo' => (int) ($siswa->tabungan_max_saldo ?? 0),
+            ];
+        })->values()->all();
+
+        $barangsData = $barangs->map(fn (Barang $barang): array => [
+            'id' => (string) $barang->id,
+            'kode' => (string) ($barang->kode ?? ''),
+            'nama' => (string) $barang->nama,
+            'harga' => (int) ($barang->harga ?? 0),
+            'stok' => (int) ($barang->stok ?? 0),
+            'satuan' => (string) ($barang->satuan ?? 'PCS'),
+            'lembaga_id' => $barang->lembaga_id,
+        ])->values()->all();
 
         return view('livewire.admin.penjualan.penjualan-form', [
             'siswas' => $siswas,
             'barangs' => $barangs,
+            'siswasData' => $siswasData,
+            'barangsData' => $barangsData,
+            'isReadOnly' => (bool) ($this->penjualan && $this->penjualan->exists),
         ])->layout('components.admin-layout');
     }
 }

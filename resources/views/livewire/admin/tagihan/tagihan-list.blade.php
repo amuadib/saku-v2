@@ -19,7 +19,7 @@
                 <flux:select wire:model.live="filter_kas_id" class="w-full sm:w-1/4" placeholder="Semua Kas">
                     <flux:select.option value="">Semua Kas</flux:select.option>
                     @foreach($kasList as $kas)
-                        <flux:select.option value="{{ $kas->id }}">{{ $kas->nama }}</flux:select.option>
+                        <flux:select.option value="{{ $kas->id }}">{{ $kas -> nama  }} - {{ $lembagaList[$kas->lembaga_id]['nama'] }}</flux:select.option>
                     @endforeach
                 </flux:select>
 

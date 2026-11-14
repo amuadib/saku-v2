@@ -158,11 +158,14 @@ class TagihanList extends Component
         $kasList = Kas::where('ada_tagihan', true)
             ->when(! auth()->user()->isAdmin(), function ($q) {
                 $q->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
-            })->get();
+            })
+            ->orderBy('nama')
+            ->get();
 
         return view('livewire.admin.tagihan.tagihan-list', [
             'tagihans' => $tagihans,
             'kasList' => $kasList,
+            'lembagaList' => config('custom.lembaga'),
         ])->layout('components.admin-layout');
     }
 }

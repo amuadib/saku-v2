@@ -17,7 +17,7 @@ class Tagihan extends Model
 
     protected $table = 'tagihan';
 
-    protected $fillable = ['kode', 'siswa_id', 'kas_id', 'jumlah', 'keterangan', 'user_id', 'bayar'];
+    protected $fillable = ['kode', 'siswa_id', 'kas_id', 'jumlah', 'keterangan', 'user_id', 'bayar', 'tanggal_kadaluarsa'];
 
     public function transaksi(): MorphOne
     {

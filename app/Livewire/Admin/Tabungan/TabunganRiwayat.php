@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Tabungan;
 
 use App\Models\Tabungan;
 use App\Models\Transaksi;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,21 +13,21 @@ class TabunganRiwayat extends Component
 {
     use WithPagination;
 
-    public $tabungan_id;
+    public string $tabungan_id = '';
 
     public Tabungan $tabungan;
 
-    public function mount(Tabungan $tabungan)
+    public function mount(Tabungan $tabungan): void
     {
-        $this->tabungan = $tabungan;
-        $this->tabungan_id = $tabungan->id;
+        $this->tabungan = $tabungan->loadMissing(['siswa', 'kas']);
+        $this->tabungan_id = (string) $tabungan->id;
     }
 
     #[Layout('components.admin-layout', ['title' => 'Riwayat Tabungan'])]
-    public function render()
+    public function render(): View
     {
         $transaksis = Transaksi::where('transable_id', $this->tabungan_id)
-            ->where('transable_type', 'App\Models\Tabungan')
+            ->whereIn('transable_type', [Tabungan::class, 'tabungan', 'App\Models\Tabungan'])
             ->latest()
             ->paginate(15);
 

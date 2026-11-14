@@ -32,6 +32,7 @@ use App\Livewire\Admin\Tabungan\TabunganList;
 use App\Livewire\Admin\Tabungan\TabunganRiwayat;
 use App\Livewire\Admin\Tagihan\TagihanForm;
 use App\Livewire\Admin\Tagihan\TagihanList;
+use App\Livewire\Admin\Tagihan\TagihanRekap;
 use App\Livewire\Admin\Transaksi\TransaksiForm;
 use App\Livewire\Admin\Transaksi\TransaksiList;
 use App\Livewire\Admin\User\UserForm;
@@ -176,6 +177,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // Tagihan CRUD
     Route::get('/tagihan', TagihanList::class)->name('tagihan.index');
     Route::get('/tagihan/create', TagihanForm::class)->name('tagihan.create');
+    Route::get('/tagihan/rekap', TagihanRekap::class)->name('tagihan.rekap');
     Route::get('/tagihan/{tagihan}/edit', TagihanForm::class)->name('tagihan.edit');
 
     // Pembelian CRUD

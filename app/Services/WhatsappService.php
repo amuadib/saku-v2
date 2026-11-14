@@ -34,7 +34,9 @@ class WhatsappService
         $tabungan = '';
         $t3 = $template['akhir'];
 
-        $magic_link = PHP_EOL.'Klik link berikut untuk login ke Aplikasi Siswa: '.$siswa->auth->getMagicLoginUrl().PHP_EOL;
+        $magic_link = $siswa->auth
+            ? (PHP_EOL.'Klik link berikut untuk login ke Aplikasi Siswa: '.$siswa->auth->getMagicLoginUrl().PHP_EOL)
+            : '';
 
         if ($jenis == 'link.resend') {
             return $test_message.

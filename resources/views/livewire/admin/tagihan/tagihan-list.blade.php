@@ -4,7 +4,10 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Data Tagihan
             </h2>
-            <flux:button variant="primary" href="{{ route('admin.tagihan.create') }}" wire:navigate>Buat Tagihan</flux:button>
+            <div class="flex items-center gap-2">
+                <flux:button variant="outline" href="{{ route('admin.tagihan.rekap') }}" wire:navigate icon="document-chart-bar">Rekap Tagihan</flux:button>
+                <flux:button variant="primary" href="{{ route('admin.tagihan.create') }}" wire:navigate icon="plus">Buat Tagihan</flux:button>
+            </div>
         </div>
     </x-slot>
 

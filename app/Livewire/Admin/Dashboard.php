@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Kas;
+use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -12,8 +13,8 @@ class Dashboard extends Component
 {
     public function render()
     {
-        if (auth()->user()->role_id == 5) {
-            return $this->renderSiswa();
+        if (auth()->user()->role_id == 5 || auth()->user()->authable_type === Siswa::class) {
+            return redirect()->route('siswa.dashboard');
         }
         // 1. Saldo Kas
         $kasData = Kas::where('saldo', '>', 0)->get(['nama', 'saldo']);

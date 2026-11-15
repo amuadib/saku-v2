@@ -12,4 +12,6 @@ class Anggota extends Model
     use HasUuids;
 
     protected $table = 'anggota';
+
+    protected $guarded = [];
 }

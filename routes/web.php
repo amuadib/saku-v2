@@ -101,6 +101,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/transaksi', App\Livewire\Siswa\TransaksiList::class)->name('siswa.transaksi');
     Route::get('/kartu-siswa', KartuSiswa::class)->name('siswa.kartu');
     Route::get('/chat', Chat::class)->name('siswa.chat');
+
+    Route::get('/leave-impersonate', function () {
+        if (session()->has('impersonate_by')) {
+            $original = User::find(session()->pull('impersonate_by'));
+            if ($original) {
+                auth()->login($original);
+            }
+
+            return redirect()->route('admin.user.index')->with('message', 'Kembali ke akun semula.');
+        }
+
+        return redirect()->route('dashboard');
+    })->name('leave-impersonate');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
@@ -147,20 +160,15 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         session()->put('impersonate_by', auth()->id());
         auth()->login($user);
 
+        if ($user->authable_type === Siswa::class || $user->role_id === 5) {
+            return redirect()->route('siswa.dashboard')->with('message', 'Mode impersonasi aktif untuk siswa: '.($user->authable->nama ?? $user->username));
+        }
+
         return redirect()->route('admin.dashboard')->with('message', 'Berhasil login sebagai '.$user->username);
     })->name('user.impersonate');
 
     Route::get('/leave-impersonate', function () {
-        if (session()->has('impersonate_by')) {
-            $original = User::find(session()->pull('impersonate_by'));
-            if ($original) {
-                auth()->login($original);
-            }
-
-            return redirect()->route('admin.user.index')->with('message', 'Kembali ke akun semula.');
-        }
-
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('leave-impersonate');
     })->name('leave-impersonate');
 
     // Supplier CRUD

@@ -7,6 +7,40 @@
         </div>
     </x-slot>
 
+    <!-- Stats Carousel -->
+    @if(isset($stats))
+        <x-stat-carousel :cols="4" class="mb-6">
+            <x-stat-card
+                title="Total Siswa"
+                :value="number_format($stats['totalSiswa'])"
+                icon="users"
+                color="indigo"
+                description="Total data siswa terdaftar"
+            />
+            <x-stat-card
+                title="Siswa Aktif"
+                :value="number_format($stats['siswaAktif'])"
+                icon="check-circle"
+                color="emerald"
+                description="Siswa berstatus aktif"
+            />
+            <x-stat-card
+                title="Siswa Nonaktif"
+                :value="number_format($stats['siswaNonaktif'])"
+                icon="x-circle"
+                color="rose"
+                description="Lulus / pindah / nonaktif"
+            />
+            <x-stat-card
+                title="Login 7 Hari Terakhir"
+                :value="number_format($stats['loginMingguIni'])"
+                icon="device-phone-mobile"
+                color="sky"
+                description="Siswa login dalam 7 hari terakhir"
+            />
+        </x-stat-carousel>
+    @endif
+
     <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg mb-6">
         <div class="p-6">
             <div class="mb-4" x-data="{ showAdvanced: false }">
@@ -142,84 +176,174 @@
                 </flux:callout>
             @endif
 
-            <flux:table>
-                <flux:table.columns>
-                    <flux:table.column>
-                        <flux:checkbox wire:model.live="selectAllPage" />
-                    </flux:table.column>
-                    <flux:table.column>NIS/NISN</flux:table.column>
-                    <flux:table.column>Nama Siswa</flux:table.column>
-                    <flux:table.column>Kelas</flux:table.column>
-                    <flux:table.column>Status</flux:table.column>
-                    <flux:table.column>Login Terakhir</flux:table.column>
-                    <flux:table.column>Label</flux:table.column>
-                    <flux:table.column>Aksi</flux:table.column>
-                </flux:table.columns>
-                <flux:table.rows>
+            <x-responsive-view>
+                <x-slot:desktop>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>
+                                <flux:checkbox wire:model.live="selectAllPage" />
+                            </flux:table.column>
+                            <flux:table.column>NIS/NISN</flux:table.column>
+                            <flux:table.column>Nama Siswa</flux:table.column>
+                            <flux:table.column>Kelas</flux:table.column>
+                            <flux:table.column>Status</flux:table.column>
+                            <flux:table.column>Login Terakhir</flux:table.column>
+                            <flux:table.column>Label</flux:table.column>
+                            <flux:table.column>Aksi</flux:table.column>
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @forelse ($siswa_items as $siswa)
+                                <flux:table.row wire:key="{{ $siswa->id }}">
+                                    <flux:table.cell>
+                                        <flux:checkbox wire:model.live="selected" value="{{ $siswa->id }}" />
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <div class="text-sm font-medium">{{ $siswa->nis }}</div>
+                                        <div class="text-xs text-gray-500">{{ $siswa->nisn }}</div>
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <div class="font-medium text-zinc-900 dark:text-zinc-100">{{ $siswa->nama }}</div>
+                                    </flux:table.cell>
+                                    <flux:table.cell>{{ optional($siswa->kelas)->nama ?? '-' }}</flux:table.cell>
+                                    <flux:table.cell>
+                                        @if($siswa->status)
+                                            @if($siswa->status == 1)
+                                            <flux:badge color="green">{{ config('custom.siswa.status.'.$siswa->status) }}</flux:badge>
+                                            @else
+                                                <flux:badge color="red">{{ config('custom.siswa.status.'.$siswa->status) }}</flux:badge>
+                                            @endif
+                                        @endif
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        @if($siswa->last_login_at)
+                                            <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="group block hover:opacity-80">
+                                                <div class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1">
+                                                    <flux:icon name="arrow-top-right-on-square" class="size-3 text-zinc-400 group-hover:text-blue-500 shrink-0" />
+                                                    <span>{{ $siswa->last_login_at->translatedFormat('d M Y, H:i') }}</span>
+                                                </div>
+                                                <div class="text-[11px] text-zinc-500 dark:text-zinc-400">
+                                                    {{ $siswa->last_login_at->diffForHumans() }}
+                                                </div>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="text-xs text-zinc-400 dark:text-zinc-500 italic hover:text-zinc-600 dark:hover:text-zinc-300 hover:underline">
+                                                Belum pernah login
+                                            </a>
+                                        @endif
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        @if($siswa->tags->isNotEmpty())
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach($siswa->tags as $tag)
+                                                    <flux:badge color="blue" size="sm">{{ $tag->name }}</flux:badge>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </flux:table.cell>
+                                    <flux:table.cell>
+                                        <div class="flex gap-2">
+                                            <flux:button size="sm" color="amber" href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" icon="clock" tooltip="Riwayat Aktivitas & Login"></flux:button>
+                                            <flux:button size="sm" color="purple" wire:click="generateMagicLink('{{ $siswa->id }}')" icon="link" tooltip="Magic Link"></flux:button>
+                                            <flux:button size="sm" color="green" wire:click="$dispatch('open-penjualan-modal', { siswa_id: '{{ $siswa->id }}' })" icon="shopping-cart" tooltip="Penjualan"></flux:button>
+                                            <flux:button size="sm" color="cyan" href="{{ route('admin.siswa.show', $siswa->id) }}" wire:navigate icon="eye" tooltip="Detail"></flux:button>
+                                        </div>
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @empty
+                                <flux:table.row>
+                                    <flux:table.cell colspan="8" class="text-center">Data tidak ditemukan.</flux:table.cell>
+                                </flux:table.row>
+                            @endforelse
+                        </flux:table.rows>
+                    </flux:table>
+                </x-slot:desktop>
+
+                <x-slot:mobile>
+                    @if($siswa_items->isNotEmpty())
+                        <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-600 dark:text-zinc-400">
+                            <label class="flex items-center gap-2 cursor-pointer font-medium">
+                                <flux:checkbox wire:model.live="selectAllPage" />
+                                <span>Pilih semua di halaman ini</span>
+                            </label>
+                            @if(count($selected) > 0)
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ count($selected) }} dipilih</span>
+                            @endif
+                        </div>
+                    @endif
+
                     @forelse ($siswa_items as $siswa)
-                        <flux:table.row wire:key="{{ $siswa->id }}">
-                            <flux:table.cell>
-                                <flux:checkbox wire:model.live="selected" value="{{ $siswa->id }}" />
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                <div class="text-sm font-medium">{{ $siswa->nis }}</div>
-                                <div class="text-xs text-gray-500">{{ $siswa->nisn }}</div>
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                <div class="font-medium text-zinc-900 dark:text-zinc-100">{{ $siswa->nama }}</div>
-                            </flux:table.cell>
-                            <flux:table.cell>{{ optional($siswa->kelas)->nama ?? '-' }}</flux:table.cell>
-                            <flux:table.cell>
-                                @if($siswa->status)
-                                    @if($siswa->status == 1)
-                                    <flux:badge color="green">{{ config('custom.siswa.status.'.$siswa->status) }}</flux:badge>
-                                    @else
-                                        <flux:badge color="red">{{ config('custom.siswa.status.'.$siswa->status) }}</flux:badge>
+                        @php
+                            $kelasNama = optional($siswa->kelas)->nama ?? '-';
+                            $subtitle = 'NIS: ' . $siswa->nis . ($siswa->nisn ? ' • NISN: ' . $siswa->nisn : '') . ' • ' . $kelasNama;
+                            $isActive = $siswa->status == 1;
+                        @endphp
+                        <x-mobile-card
+                            :title="$siswa->nama"
+                            :subtitle="$subtitle"
+                            :avatar-color="$isActive ? 'emerald' : 'zinc'"
+                            wire:key="mobile-siswa-{{ $siswa->id }}"
+                        >
+                            <x-slot:badge>
+                                <div class="flex items-center gap-2">
+                                    <flux:checkbox wire:model.live="selected" value="{{ $siswa->id }}" />
+                                    @if($siswa->status)
+                                        @if($siswa->status == 1)
+                                            <flux:badge color="green" size="sm">{{ config('custom.siswa.status.'.$siswa->status) }}</flux:badge>
+                                        @else
+                                            <flux:badge color="red" size="sm">{{ config('custom.siswa.status.'.$siswa->status) }}</flux:badge>
+                                        @endif
                                     @endif
-                                @endif
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                @if($siswa->last_login_at)
-                                    <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="group block hover:opacity-80">
-                                        <div class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1">
-                                            <flux:icon name="arrow-top-right-on-square" class="size-3 text-zinc-400 group-hover:text-blue-500 shrink-0" />
-                                            <span>{{ $siswa->last_login_at->translatedFormat('d M Y, H:i') }}</span>
-                                        </div>
-                                        <div class="text-[11px] text-zinc-500 dark:text-zinc-400">
-                                            {{ $siswa->last_login_at->diffForHumans() }}
-                                        </div>
-                                    </a>
-                                @else
-                                    <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="text-xs text-zinc-400 dark:text-zinc-500 italic hover:text-zinc-600 dark:hover:text-zinc-300 hover:underline">
-                                        Belum pernah login
-                                    </a>
-                                @endif
-                            </flux:table.cell>
-                            <flux:table.cell>
+                                </div>
+                            </x-slot:badge>
+
+                            <div class="space-y-2 pt-1">
                                 @if($siswa->tags->isNotEmpty())
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($siswa->tags as $tag)
-                                            <flux:badge color="blue" size="sm">{{ $tag->name }}</flux:badge>
+                                            <flux:badge color="blue" size="xs">{{ $tag->name }}</flux:badge>
                                         @endforeach
                                     </div>
                                 @endif
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                <div class="flex gap-2">
-                                    <flux:button size="sm" color="amber" href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" icon="clock" tooltip="Riwayat Aktivitas & Login"></flux:button>
-                                    <flux:button size="sm" color="purple" wire:click="generateMagicLink('{{ $siswa->id }}')" icon="link" tooltip="Magic Link"></flux:button>
-                                    <flux:button size="sm" color="green" wire:click="$dispatch('open-penjualan-modal', { siswa_id: '{{ $siswa->id }}' })" icon="shopping-cart" tooltip="Penjualan"></flux:button>
-                                    <flux:button size="sm" color="cyan" href="{{ route('admin.siswa.show', $siswa->id) }}" wire:navigate icon="eye" tooltip="Detail"></flux:button>
+
+                                <div class="flex items-center justify-between text-xs pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                                    <span class="text-zinc-500 dark:text-zinc-400">Login Terakhir</span>
+                                    @if($siswa->last_login_at)
+                                        <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="group flex items-center gap-1 font-medium text-zinc-800 dark:text-zinc-200 hover:text-blue-600 dark:hover:text-blue-400">
+                                            <flux:icon name="arrow-top-right-on-square" class="size-3 text-zinc-400 group-hover:text-blue-500" />
+                                            <span>{{ $siswa->last_login_at->translatedFormat('d M Y, H:i') }}</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" class="text-xs text-zinc-400 dark:text-zinc-500 italic hover:underline">
+                                            Belum pernah login
+                                        </a>
+                                    @endif
                                 </div>
-                            </flux:table.cell>
-                        </flux:table.row>
+                            </div>
+
+                            <x-slot:action>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <flux:button size="sm" color="amber" href="{{ route('admin.siswa.aktivitas', $siswa->id) }}" target="_blank" icon="clock">
+                                        Aktivitas
+                                    </flux:button>
+                                    <flux:button size="sm" color="purple" wire:click="generateMagicLink('{{ $siswa->id }}')" icon="link">
+                                        Magic Link
+                                    </flux:button>
+                                    <flux:button size="sm" color="green" wire:click="$dispatch('open-penjualan-modal', { siswa_id: '{{ $siswa->id }}' })" icon="shopping-cart">
+                                        POS
+                                    </flux:button>
+                                    <flux:button size="sm" color="cyan" href="{{ route('admin.siswa.show', $siswa->id) }}" wire:navigate icon="eye">
+                                        Detail
+                                    </flux:button>
+                                </div>
+                            </x-slot:action>
+                        </x-mobile-card>
                     @empty
-                        <flux:table.row>
-                            <flux:table.cell colspan="8" class="text-center">Data tidak ditemukan.</flux:table.cell>
-                        </flux:table.row>
+                        <div class="p-8 text-center bg-white dark:bg-zinc-800/80 rounded-2xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400">
+                            Data siswa tidak ditemukan.
+                        </div>
                     @endforelse
-                </flux:table.rows>
-            </flux:table>
+                </x-slot:mobile>
+            </x-responsive-view>
 
             <div class="mt-4">
                 {{ $siswa_items->links() }}

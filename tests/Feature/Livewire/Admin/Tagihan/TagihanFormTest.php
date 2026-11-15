@@ -233,4 +233,3 @@ it('validates kas and target matches selected lembaga', function () {
         ->call('save')
         ->assertHasErrors(['kas_id']);
 });
-

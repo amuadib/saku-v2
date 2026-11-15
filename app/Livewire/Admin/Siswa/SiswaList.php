@@ -538,9 +538,18 @@ class SiswaList extends Component
 
         $siswa_items = $this->getSiswaQuery()->paginate(10);
 
+        $statsQuery = clone $this->getSiswaQuery();
+        $stats = [
+            'totalSiswa' => (clone $statsQuery)->count(),
+            'siswaAktif' => (clone $statsQuery)->where('status', 1)->count(),
+            'siswaNonaktif' => (clone $statsQuery)->where('status', '!=', 1)->count(),
+            'loginMingguIni' => (clone $statsQuery)->where('last_login_at', '>=', now()->subDays(7))->count(),
+        ];
+
         return view('livewire.admin.siswa.siswa-list', [
             'siswa_items' => $siswa_items,
             'kelas_items' => $kelas_items,
+            'stats' => $stats,
         ])->layout('components.admin-layout');
     }
 

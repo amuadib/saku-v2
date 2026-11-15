@@ -73,15 +73,25 @@ class KasList extends Component
 
     public function render()
     {
-        $kas_items = Kas::where('nama', 'like', '%'.$this->search.'%')
-            ->when($this->filter_lembaga, function ($query) {
-                $query->where('lembaga_id', $this->filter_lembaga);
-            })
+        $baseQuery = Kas::when($this->filter_lembaga, function ($query) {
+            $query->where('lembaga_id', $this->filter_lembaga);
+        });
+
+        $kas_items = (clone $baseQuery)
+            ->where('nama', 'like', '%'.$this->search.'%')
             ->orderBy('nama')
             ->paginate(10);
 
+        $stats = [
+            'totalKas' => (clone $baseQuery)->count(),
+            'totalSaldo' => (float) (clone $baseQuery)->sum('saldo'),
+            'kasTagihan' => (clone $baseQuery)->where('ada_tagihan', true)->count(),
+            'kasTabungan' => (clone $baseQuery)->where('tabungan', true)->count(),
+        ];
+
         return view('livewire.admin.kas.kas-list', [
             'kas_items' => $kas_items,
+            'stats' => $stats,
         ])->layout('components.admin-layout');
     }
 }

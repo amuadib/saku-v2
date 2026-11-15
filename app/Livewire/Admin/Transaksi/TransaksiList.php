@@ -132,9 +132,18 @@ class TransaksiList extends Component
         $reversedKodes = Transaksi::whereIn('kode', array_map(fn ($k) => 'REV-'.$k, $kodes))->pluck('kode')->toArray();
         $reversedOriginalKodes = array_map(fn ($k) => substr($k, 4), $reversedKodes);
 
+        $today = today();
+        $stats = [
+            'transaksiHariIni' => Transaksi::whereDate('created_at', $today)->count(),
+            'masukHariIni' => (float) Transaksi::whereDate('created_at', $today)->where('jumlah', '>', 0)->sum('jumlah'),
+            'keluarHariIni' => (float) abs(Transaksi::whereDate('created_at', $today)->where('jumlah', '<', 0)->sum('jumlah')),
+            'totalSemua' => Transaksi::count(),
+        ];
+
         return view('livewire.admin.transaksi.transaksi-list', [
             'transaksis' => $transaksis,
             'reversedOriginalKodes' => $reversedOriginalKodes,
+            'stats' => $stats,
         ])->layout('components.admin-layout');
     }
 }

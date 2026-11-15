@@ -126,7 +126,7 @@ class TagihanList extends Component
 
     public function render()
     {
-        $tagihans = Tagihan::with(['siswa', 'kas'])
+        $tagihans = Tagihan::with(['siswa.kelas', 'kas'])
             ->when(! auth()->user()->isAdmin(), function ($q) {
                 $q->whereHas('siswa', function ($sub) {
                     $sub->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
@@ -162,10 +162,36 @@ class TagihanList extends Component
             ->orderBy('nama')
             ->get();
 
+        $statsQuery = Tagihan::query()
+            ->when(! auth()->user()->isAdmin(), function ($q) {
+                $q->whereHas('siswa', function ($sub) {
+                    $sub->where('lembaga_id', auth()->user()->authable->lembaga_id ?? null);
+                });
+            });
+
+        $totalTagihanNominal = (float) ($statsQuery->clone()->sum('jumlah') ?? 0);
+        $totalBayarNominal = (float) ($statsQuery->clone()->sum('bayar') ?? 0);
+        $totalSisaNominal = max(0, $totalTagihanNominal - $totalBayarNominal);
+        $countTotal = $statsQuery->clone()->count();
+        $countLunas = $statsQuery->clone()->whereColumn('bayar', '>=', 'jumlah')->count();
+        $countBelumLunas = $statsQuery->clone()->where(function ($sub) {
+            $sub->whereNull('bayar')->orWhereColumn('bayar', '<', 'jumlah');
+        })->count();
+        $percentLunas = $totalTagihanNominal > 0 ? (int) round(($totalBayarNominal / $totalTagihanNominal) * 100) : 0;
+
         return view('livewire.admin.tagihan.tagihan-list', [
             'tagihans' => $tagihans,
             'kasList' => $kasList,
             'lembagaList' => config('custom.lembaga'),
+            'stats' => [
+                'totalNominal' => $totalTagihanNominal,
+                'bayarNominal' => $totalBayarNominal,
+                'sisaNominal' => $totalSisaNominal,
+                'countTotal' => $countTotal,
+                'countLunas' => $countLunas,
+                'countBelumLunas' => $countBelumLunas,
+                'percentLunas' => $percentLunas,
+            ],
         ])->layout('components.admin-layout');
     }
 }

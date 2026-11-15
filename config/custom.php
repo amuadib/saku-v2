@@ -163,9 +163,9 @@ $config = [
     'tabungan' => [
         'potongan' => [
             'lembaga' => [1, 2],
-            'kas_admin_id' => '',
-            'min_saldo_tidak_kena_admin' => 5000,
-            'jumlah_per_tahun' => 1000,
+            'kas_admin_id' => '9df33b4c-d249-4758-98a5-72111488a7f1',
+            'min_saldo_tidak_kena_admin' => 50000,
+            'jumlah_per_tahun' => 10000,
             'tanggal' => '2024-01-01',
         ],
     ],

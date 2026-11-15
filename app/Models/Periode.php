@@ -14,7 +14,7 @@ class Periode extends Model
 
     protected $table = 'periode';
 
-    protected $fillable = ['nama', 'aktif'];
+    protected $fillable = ['nama', 'mulai', 'selesai', 'aktif'];
 
     protected $casts = [
         'aktif' => 'boolean',

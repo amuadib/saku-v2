@@ -55,9 +55,11 @@
                     </div>
                     
                     <div class="w-full sm:w-auto flex flex-wrap gap-2 justify-end shrink-0">
-                        <flux:button wire:click="generateUserSiswa" icon="user-plus" wire:loading.attr="disabled" color="primary" wire:confirm="Apakah Anda yakin ingin generate user untuk semua data siswa aktif?">
-                            <span wire:loading.remove wire:target="generateUserSiswa">Generate User</span>
-                            <span wire:loading wire:target="generateUserSiswa">Memproses...</span>
+                        <flux:button wire:click="generateUserSiswa" icon="user-plus" wire:loading.attr="disabled" :disabled="$isGeneratingUser" color="primary" wire:confirm="Apakah Anda yakin ingin generate user untuk data siswa? Proses akan berjalan di latar belakang.">
+                            <span wire:loading.remove wire:target="generateUserSiswa">
+                                {{ $isGeneratingUser ? 'Sedang Diproses...' : 'Generate User' }}
+                            </span>
+                            <span wire:loading wire:target="generateUserSiswa">Memulai...</span>
                         </flux:button>
                         <flux:button wire:click="syncSiswa" icon="arrow-path" wire:loading.attr="disabled" color="primary">
                             <span wire:loading.remove wire:target="syncSiswa">Sinkron Manual</span>
@@ -144,9 +146,20 @@
                 </div>
             @endif
 
+            @if($isGeneratingUser)
+                <div wire:poll.2s="checkGenerateUserStatus" class="mb-4 flex items-center justify-between p-3.5 text-sm rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800/60 shadow-xs">
+                    <div class="flex items-center gap-2.5">
+                        <flux:icon name="arrow-path" class="size-4 animate-spin text-blue-600 dark:text-blue-400" />
+                        <span>Sedang membuat akun user siswa di latar belakang... Halaman ini akan otomatis menampilkan notifikasi begitu proses selesai.</span>
+                    </div>
+                    <flux:badge color="blue" size="sm">Memproses</flux:badge>
+                </div>
+            @endif
+
             @if(count($selected) > 0)
                 <div class="mb-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex flex-wrap gap-2">
+                        <flux:button size="sm" color="indigo" icon="user-plus" wire:click="generateUserSiswa" :disabled="$isGeneratingUser" wire:confirm="Generate user untuk siswa yang dipilih di latar belakang?">Generate User</flux:button>
                         <flux:button size="sm" color="blue" icon="paper-airplane" wire:click="kirimTagihan" wire:confirm="Kirim tagihan ke siswa yang dipilih?">Kirim tagihan</flux:button>
                         <flux:button size="sm" color="orange" icon="user-plus" wire:click="kirimMagicLink" wire:confirm="Kirim magic link ke siswa yang dipilih?">Kirim Magic Link</flux:button>
                         <flux:modal.trigger name="export-modal">

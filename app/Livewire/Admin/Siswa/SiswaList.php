@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Siswa;
 
+use App\Jobs\GenerateUserSiswaJob;
 use App\Models\Kelas;
 use App\Models\Penjualan;
 use App\Models\Siswa;
@@ -9,8 +10,8 @@ use App\Models\User;
 use App\Services\WhatsappService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -69,11 +70,20 @@ class SiswaList extends Component
 
     public $magicLinkSiswaId = null;
 
+    public bool $isGeneratingUser = false;
+
     // Penjualan Modal Properties removed (extracted to SiswaPenjualanModal)
 
     public function mount()
     {
         Gate::authorize('viewAny', Siswa::class);
+
+        $userId = auth()->id();
+        if ($userId && Cache::has('generate_user_siswa_running_'.$userId)) {
+            $this->isGeneratingUser = true;
+        }
+
+        $this->checkGenerateUserStatus();
     }
 
     public function updating($property, $value)
@@ -325,54 +335,57 @@ class SiswaList extends Component
         session()->flash('message', 'Data siswa terpilih berhasil dihapus.');
     }
 
-    public function generateUserSiswa()
+    public function generateUserSiswa(): void
     {
-        $query = Siswa::where('status', 1);
-
-        if (! auth()->user()->isAdmin()) {
-            $query->where('lembaga_id', auth()->user()->lembaga_id);
+        $user = auth()->user();
+        if (! $user) {
+            return;
         }
 
-        $siswas = $query->get();
-        $count = 0;
+        $lembagaId = $user->isAdmin() ? null : ($user->authable->lembaga_id ?? null);
+        $siswaIds = ! empty($this->selected) ? $this->selected : null;
+        $targetText = $siswaIds ? count($siswaIds).' siswa terpilih' : 'seluruh siswa aktif';
 
-        foreach ($siswas as $siswa) {
-            $userExists = User::where('authable_type', Siswa::class)
-                ->where('authable_id', $siswa->id)
-                ->exists();
+        $this->isGeneratingUser = true;
+        Cache::put('generate_user_siswa_running_'.$user->id, true, 600);
+        Cache::forget('generate_user_siswa_status_'.$user->id);
 
-            if (! $userExists) {
-                if (! empty($siswa->nisn)) {
-                    $username = $siswa->nisn;
-                } elseif (! empty($siswa->nis)) {
-                    $username = $siswa->nis;
-                } else {
-                    $namaHuruf = preg_replace('/[^a-zA-Z]/', '', $siswa->nama);
-                    $nama5 = strtolower(substr($namaHuruf, 0, 5));
-                    $username = $nama5.mt_rand(1000, 9999);
-                }
-
-                if (User::where('username', $username)->exists()) {
-                    $username .= '_'.Str::random(4);
-                }
-
-                User::create([
-                    'role_id' => 5,
-                    'username' => $username,
-                    'password' => Hash::make($username),
-                    'authable_type' => Siswa::class,
-                    'authable_id' => $siswa->id,
-                ]);
-                $count++;
-            }
-        }
+        GenerateUserSiswaJob::dispatch(
+            userId: (string) $user->id,
+            lembagaId: $lembagaId,
+            siswaIds: $siswaIds
+        );
 
         $this->deselectAll();
 
-        if ($count > 0) {
-            \Flux::toast("$count User Siswa berhasil dibuat.", variant: 'success');
-        } else {
-            \Flux::toast('Tidak ada user baru yang dibuat (semua siswa terpilih sudah memiliki user).', variant: 'warning');
+        \Flux::toast("Proses generate user untuk {$targetText} sedang berjalan di latar belakang...", variant: 'info');
+    }
+
+    public function checkGenerateUserStatus(): void
+    {
+        $userId = auth()->id();
+        if (! $userId) {
+            return;
+        }
+
+        $status = Cache::pull('generate_user_siswa_status_'.$userId);
+
+        if ($status) {
+            $this->isGeneratingUser = false;
+            Cache::forget('generate_user_siswa_running_'.$userId);
+
+            $count = $status['count'] ?? 0;
+            $total = $status['total'] ?? 0;
+
+            if ($count > 0) {
+                \Flux::toast("Selesai! Berhasil membuat {$count} akun user siswa baru.", variant: 'success');
+            } else {
+                \Flux::toast("Selesai! Semua siswa ({$total}) sudah memiliki akun user.", variant: 'warning');
+            }
+
+            $this->resetPage();
+        } elseif (! Cache::has('generate_user_siswa_running_'.$userId)) {
+            $this->isGeneratingUser = false;
         }
     }
 

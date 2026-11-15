@@ -12,6 +12,8 @@ class DetailPembelian extends Model
 
     protected $table = 'detail_pembelian';
 
+    protected $guarded = [];
+
     public $timestamps = false;
 
     public function barang(): BelongsTo

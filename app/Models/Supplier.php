@@ -13,5 +13,7 @@ class Supplier extends Model
 
     protected $table = 'supplier';
 
+    protected $guarded = [];
+
     public $timestamps = false;
 }

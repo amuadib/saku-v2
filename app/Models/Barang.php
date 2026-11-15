@@ -16,6 +16,8 @@ class Barang extends Model
 
     protected $table = 'barang';
 
+    protected $guarded = [];
+
     protected $casts = [
         'varian' => 'array',
     ];

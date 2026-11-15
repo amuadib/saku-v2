@@ -78,9 +78,9 @@ if (! $initials && $title) {
     @endif
 
     {{-- Actions / Footer slot --}}
-    @if (isset($actions))
+    @if (isset($actions) || isset($action))
         <div class="pt-2 border-t border-zinc-100 dark:border-zinc-700/80 flex items-center gap-2">
-            {{ $actions }}
+            {{ $actions ?? $action }}
         </div>
     @endif
 </div>

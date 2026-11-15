@@ -15,6 +15,8 @@ class Pembelian extends Model
 
     protected $table = 'pembelian';
 
+    protected $guarded = [];
+
     public function supplier(): BelongsTo
     {
         return $this->BelongsTo(Supplier::class, 'supplier_id');

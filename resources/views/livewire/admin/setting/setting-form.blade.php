@@ -31,10 +31,17 @@
                     </h2>
                     <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Data lembaga dari API Master (Read-only)</p>
                 </div>
-                <flux:button wire:click="syncLembaga" size="sm" variant="outline" icon="arrow-path" wire:loading.attr="disabled">
-                    <span wire:loading.remove wire:target="syncLembaga">Sinkronisasi</span>
-                    <span wire:loading wire:target="syncLembaga">Menyinkronkan...</span>
-                </flux:button>
+                <div class="flex gap-2">
+                    <flux:modal.trigger name="import-json-modal">
+                        <flux:button size="sm" variant="outline" icon="cloud-arrow-down">
+                            Impor JSON
+                        </flux:button>
+                    </flux:modal.trigger>
+                    <flux:button wire:click="syncLembaga" size="sm" variant="outline" icon="arrow-path" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="syncLembaga">Sinkronisasi</span>
+                        <span wire:loading wire:target="syncLembaga">Menyinkronkan...</span>
+                    </flux:button>
+                </div>
             </div>
             
             <div class="space-y-4">
@@ -218,4 +225,83 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Impor JSON Lembaga -->
+    <flux:modal name="import-json-modal" wire:model="showImportModal" class="md:w-[620px] space-y-6">
+        <div>
+            <flux:heading size="lg">Impor Data Lembaga (JSON)</flux:heading>
+            <flux:subheading>Unggah berkas <code class="px-1 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded text-xs">.json</code> atau tempel teks JSON dari respon master lembaga.</flux:subheading>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Upload File via Alpine FileReader (Instant client-side load, avoids Livewire upload endpoint latency & race conditions) -->
+            <div x-data="{ fileName: '', fileError: '' }">
+                <flux:label>Unggah Berkas JSON</flux:label>
+                <input type="file" accept=".json,application/json"
+                    x-on:change="
+                        fileError = '';
+                        const file = $event.target.files[0];
+                        if (!file) return;
+                        if (!file.name.toLowerCase().endsWith('.json') && file.type !== 'application/json') {
+                            fileError = 'Hanya berkas berekstensi .json yang didukung.';
+                            return;
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            fileError = 'Ukuran berkas JSON maksimal 5MB.';
+                            return;
+                        }
+                        fileName = file.name;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            $wire.set('json_text', e.target.result);
+                        };
+                        reader.onerror = () => {
+                            fileError = 'Gagal membaca berkas.';
+                        };
+                        reader.readAsText(file);
+                    "
+                    class="mt-1 block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-zinc-800 dark:file:text-emerald-400 border border-gray-300 dark:border-zinc-700 rounded-lg cursor-pointer bg-white dark:bg-zinc-900 focus:outline-none" />
+                <template x-if="fileName">
+                    <div class="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+                        <flux:icon name="check-circle" class="size-3.5" />
+                        <span>Berkas <strong x-text="fileName"></strong> berhasil dimuat ke editor teks di bawah.</span>
+                    </div>
+                </template>
+                <template x-if="fileError">
+                    <span class="text-xs text-rose-500 mt-1 block" x-text="fileError"></span>
+                </template>
+            </div>
+
+            <div class="relative flex py-1 items-center">
+                <div class="flex-grow border-t border-gray-200 dark:border-zinc-700"></div>
+                <span class="flex-shrink mx-3 text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Atau Tempel Teks JSON</span>
+                <div class="flex-grow border-t border-gray-200 dark:border-zinc-700"></div>
+            </div>
+
+            <!-- Paste JSON -->
+            <div>
+                <flux:textarea wire:model="json_text" label="Teks JSON" placeholder='{"status": "success", "data": {"lembaga": { ... }}}' rows="6" font-mono />
+                @error('json_text')
+                    <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span>
+                @enderror
+            </div>
+
+            @if ($errors->has('import_error'))
+                <div class="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-lg text-xs text-rose-700 dark:text-rose-300 flex items-start gap-2">
+                    <flux:icon name="exclamation-triangle" class="size-4 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+                    <span>{{ $errors->first('import_error') }}</span>
+                </div>
+            @endif
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+            <flux:modal.close>
+                <flux:button variant="ghost">Batal</flux:button>
+            </flux:modal.close>
+            <flux:button wire:click="processImportJson" variant="primary" icon="arrow-up-tray" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="processImportJson">Proses Impor</span>
+                <span wire:loading wire:target="processImportJson">Memproses...</span>
+            </flux:button>
+        </div>
+    </flux:modal>
 </div>

@@ -24,8 +24,8 @@
 <body class="antialiased min-h-screen text-gray-800 bg-slate-100 dark:bg-zinc-950">
 
     @if(session()->has('impersonate_by'))
-        <!-- Persistent Fixed Impersonation Top Bar (Always on top with z-[9999]) -->
-        <div class="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white shadow-lg border-b border-amber-400/50">
+        <!-- Persistent Fixed Impersonation Top Bar (Always on top with z-[99999]) -->
+        <div class="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white shadow-lg border-b border-amber-400/50" style="z-index: 99999 !important;">
             <div class="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between gap-3 text-xs sm:text-sm">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="relative flex size-2.5 shrink-0">

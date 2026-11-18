@@ -33,7 +33,14 @@ class TransaksiList extends Component
             return;
         }
 
-        $isReversed = Transaksi::where('kode', 'REV'.$transaksi->kode)->exists();
+        $revChecks = ['REV'.$transaksi->kode, 'REV-'.$transaksi->kode];
+        if (str_starts_with((string) $transaksi->kode, 'ADM')) {
+            $revChecks[] = 'MRV'.substr((string) $transaksi->kode, 3);
+        } elseif (str_starts_with((string) $transaksi->kode, 'MTX')) {
+            $revChecks[] = 'KRV'.substr((string) $transaksi->kode, 3);
+        }
+
+        $isReversed = Transaksi::whereIn('kode', $revChecks)->exists();
         if ($isReversed) {
             \Flux::toast('Transaksi ini sudah direversal sebelumnya.', variant: 'warning');
 
@@ -128,9 +135,33 @@ class TransaksiList extends Component
             ->paginate(10);
 
         // Find which transaksis are already reversed
-        $kodes = $transaksis->pluck('kode')->toArray();
-        $reversedKodes = Transaksi::whereIn('kode', array_map(fn ($k) => 'REV-'.$k, $kodes))->pluck('kode')->toArray();
-        $reversedOriginalKodes = array_map(fn ($k) => substr($k, 4), $reversedKodes);
+        $kodes = $transaksis->pluck('kode')->filter()->values()->all();
+        $possibleRevKodes = [];
+        foreach ($kodes as $kode) {
+            $possibleRevKodes[] = 'REV-'.$kode;
+            $possibleRevKodes[] = 'REV'.$kode;
+            if (str_starts_with($kode, 'ADM')) {
+                $possibleRevKodes[] = 'MRV'.substr($kode, 3);
+            } elseif (str_starts_with($kode, 'MTX')) {
+                $possibleRevKodes[] = 'KRV'.substr($kode, 3);
+            }
+        }
+
+        $reversedKodes = empty($possibleRevKodes)
+            ? []
+            : Transaksi::whereIn('kode', $possibleRevKodes)->pluck('kode')->toArray();
+
+        $reversedOriginalKodes = [];
+        foreach ($kodes as $kode) {
+            if (
+                in_array('REV-'.$kode, $reversedKodes, true)
+                || in_array('REV'.$kode, $reversedKodes, true)
+                || (str_starts_with($kode, 'ADM') && in_array('MRV'.substr($kode, 3), $reversedKodes, true))
+                || (str_starts_with($kode, 'MTX') && in_array('KRV'.substr($kode, 3), $reversedKodes, true))
+            ) {
+                $reversedOriginalKodes[] = $kode;
+            }
+        }
 
         $today = today();
         $stats = [

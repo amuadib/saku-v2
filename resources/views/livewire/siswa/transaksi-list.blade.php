@@ -70,7 +70,7 @@
                     <div class="text-right">
                         <div class="font-bold text-sm {{ $textClass }}">
                             @if($jenis === 'Tabungan')
-                                {{ $isMasuk ? '+' : '-' }}Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}
+                                {{ $isMasuk ? '+' : '-' }}Rp {{ number_format(abs((float) $transaksi->jumlah), 0, ',', '.') }}
                             @else
                                 Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}
                             @endif

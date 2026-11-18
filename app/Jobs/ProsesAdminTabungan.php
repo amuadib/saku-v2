@@ -54,7 +54,8 @@ class ProsesAdminTabungan implements ShouldQueue
         $lembagaList = config('custom.tabungan.potongan.lembaga') ?? [1, 2];
 
         if (empty($kasPotonganId) || ! Kas::where('id', $kasPotonganId)->exists()) {
-            $kasPotonganId = Kas::first()?->id;
+            $kasPotonganId = Kas::where('nama', 'like', '%Administrasi%')->value('id')
+                ?? Kas::first()?->id;
         }
 
         if (! $kasPotonganId || $potongan <= 0) {
@@ -86,10 +87,17 @@ class ProsesAdminTabungan implements ShouldQueue
                 $no++;
                 $keteranganPotongan = '';
 
-                // Cek apakah tabungan ini sudah pernah dipotong admin pada tahun yang sama
+                // Cek apakah tabungan ini sudah pernah dipotong admin pada tahun yang sama (format baru ADM maupun format lama KTB)
                 $alreadyCharged = Transaksi::where('transable_type', Tabungan::class)
                     ->where('transable_id', $t->id)
-                    ->where('kode', 'like', "ADM{$tahun}%")
+                    ->where(function ($query) use ($tahun) {
+                        $query->where('kode', 'like', "ADM{$tahun}%")
+                            ->orWhere(function ($legacy) use ($tahun) {
+                                $legacy->whereYear('created_at', $tahun)
+                                    ->where('kode', 'like', 'KTB%')
+                                    ->where('keterangan', 'like', '%Administrasi%');
+                            });
+                    })
                     ->exists();
 
                 if ($t->saldo > $saldoMinimal && ! $alreadyCharged) {
@@ -143,7 +151,14 @@ class ProsesAdminTabungan implements ShouldQueue
         }
 
         return Transaksi::where('transable_type', Tabungan::class)
-            ->where('kode', 'like', "ADM{$tahun}%")
+            ->where(function ($query) use ($tahun) {
+                $query->where('kode', 'like', "ADM{$tahun}%")
+                    ->orWhere(function ($legacy) use ($tahun) {
+                        $legacy->whereYear('created_at', $tahun)
+                            ->where('kode', 'like', 'KTB%')
+                            ->where('keterangan', 'like', '%Administrasi%');
+                    });
+            })
             ->exists();
     }
 
@@ -235,14 +250,16 @@ class ProsesAdminTabungan implements ShouldQueue
         $sisaDetikSampaiAkhirTahun = max(3600, (int) (strtotime(($tahun + 1).'-01-01 00:00:00') - time()));
         Cache::put('tabungan_admin_checked_'.$tahun, true, $sisaDetikSampaiAkhirTahun);
 
-        // Update tanggal di local_config untuk backward compatibility
-        try {
-            $cfg = config('custom');
-            $cfg['tabungan']['potongan']['tanggal'] = date('Y-m-d');
-            $str = '<?php '.PHP_EOL.'$local_config ='.var_export($cfg, true).';';
-            @file_put_contents(base_path('storage/app/local_config.php'), $str);
-        } catch (\Throwable $e) {
-            Log::warning('Gagal menulis local_config.php: '.$e->getMessage());
+        // Update tanggal di local_config untuk backward compatibility (jangan menulis saat unit test berjalan)
+        if (! app()->runningUnitTests()) {
+            try {
+                $cfg = config('custom');
+                $cfg['tabungan']['potongan']['tanggal'] = date('Y-m-d');
+                $str = '<?php '.PHP_EOL.'$local_config ='.var_export($cfg, true).';';
+                @file_put_contents(base_path('storage/app/local_config.php'), $str);
+            } catch (\Throwable $e) {
+                Log::warning('Gagal menulis local_config.php: '.$e->getMessage());
+            }
         }
     }
 

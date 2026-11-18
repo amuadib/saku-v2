@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Jobs\ProsesAdminTabungan;
-use App\Models\Setting;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -64,8 +63,8 @@ class OtomatisPotongAdminTabungan
             return;
         }
 
-        // 2. Cek database apakah tahun ini sudah pernah diproses sebelumnya
-        if (Setting::where('key', 'tabungan_admin_'.$tahun)->exists()) {
+        // 2. Cek database apakah tahun ini sudah pernah diproses sebelumnya (termasuk format lama KTB)
+        if ((new ProsesAdminTabungan(tahun: $tahun))->sudahDiprosesTahunIni($tahun)) {
             $sisaDetik = max(3600, (int) (strtotime(($tahun + 1).'-01-01 00:00:00') - time()));
             Cache::put($cacheKey, true, $sisaDetik);
 

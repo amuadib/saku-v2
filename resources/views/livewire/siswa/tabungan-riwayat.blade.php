@@ -39,7 +39,7 @@
                     </div>
                     <div class="text-right">
                         <div class="font-bold text-sm {{ $isMasuk ? 'text-emerald-600' : 'text-red-600' }}">
-                            {{ $isMasuk ? '+' : '-' }}Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}
+                            {{ $isMasuk ? '+' : '-' }}Rp {{ number_format(abs((float) $transaksi->jumlah), 0, ',', '.') }}
                         </div>
                     </div>
                 </div>
